@@ -1,3 +1,6 @@
+import { ICompany } from "../../company/types";
+import { IUser } from "../../users/types";
+
 // Ziyaretin durumu (Planlandı, Tamamlandı, İptal vs.)
 export enum VisitStatus {
   PLANNED = 'PLANNED',
@@ -16,8 +19,8 @@ export interface IVisitProduct {
 // Ana Ziyaret Objemiz
 export interface IVisit {
   _id: string;
-  companyId: string; // Hangi Kuruma gidildi?
-  userId: string;    // Hangi Doktora/Kişiye gidildi?
+  companyId: string | ICompany; // Hangi Kuruma gidildi?
+  userId: string | IUser;    // Hangi Doktora/Kişiye gidildi?
   visitDate: string; // Ziyaret tarihi
   status: VisitStatus;
   notes?: string;    // Mümessilin görüşme notları

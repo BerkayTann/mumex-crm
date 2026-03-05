@@ -20,7 +20,7 @@ export async function PUT(istek: NextRequest, { params }: IRouteParams) {
     const dogrulamaSonucu = sirketEklemeSemasi.safeParse(istekGovdesi);
 
     if (!dogrulamaSonucu.success) {
-      return NextResponse.json({ basarili: false, mesaj: 'Geçersiz veri.' }, { status: 400 });
+        return NextResponse.json({ basarili: false, mesaj: 'Geçersiz veri.' }, { status: 400 });
     }
 
     // Veritabanında o ID'ye sahip kurumu bul ve yeni veriyle değiştir (Güncelle)
