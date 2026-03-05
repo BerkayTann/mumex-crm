@@ -1,16 +1,32 @@
 import React from "react";
 import { IUser, UserTitle } from "../types";
 import { ICompany } from "../../company/types";
-import { Users, UserPlus, Building } from "lucide-react";
+import {
+  Building2,
+  PlusCircle,
+  Pencil,
+  Trash2,
+  Users,
+  UserPlus,
+  Building,
+} from "lucide-react";
+
+// Bileşenin dışarıdan alacağı verilerin (props) tipini belirliyoruz
 
 interface IUserListProps {
   kisiler: IUser[];
   onYeniKisiEkleTiklandi: () => void;
+  onDuzenleTiklandi: (kisi: IUser) => void; // Düzenleme olayını yukarıya iletiyoruz
+  onSilTiklandi: (id: string) => void; // Silme olayını yukarıya iletiyoruz
 }
+
+// Saf bileşenimiz (İngilizce isim, içerideki mantık Türkçe)
 
 export const UserList: React.FC<IUserListProps> = ({
   kisiler,
   onYeniKisiEkleTiklandi,
+  onDuzenleTiklandi,
+  onSilTiklandi,
 }) => {
   return (
     <div className="p-6">
@@ -73,6 +89,24 @@ export const UserList: React.FC<IUserListProps> = ({
                 </td>
                 <td className="px-6 py-4 text-sm text-slate-500">
                   {kisi.email || kisi.phone || "-"}
+                </td>
+                <td className="px-6 py-4 text-right">
+                  <div className="flex justify-end gap-2">
+                    <button
+                      onClick={() => onDuzenleTiklandi(kisi)}
+                      className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                      title="Düzenle"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => onSilTiklandi(kisi._id)}
+                      className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                      title="Sil"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

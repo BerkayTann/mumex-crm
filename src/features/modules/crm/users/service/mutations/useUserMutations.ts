@@ -24,3 +24,31 @@ export const useKisiEkle = () => {
     },
   });
 };
+
+// 1. KİŞİ GÜNCELLE
+export const kisiGuncelle = async ({ id, guncelVeri }: { id: string, guncelVeri: ICreateUserPayload }): Promise<IUser> => {
+  const yanit = await apiIstemcisi.put<IApiYaniti<IUser>>(`/users/${id}`, guncelVeri);
+  return yanit.data.veri;
+};
+
+export const useKisiGuncelle = () => {
+  const sorguIstemcisi = useQueryClient();
+  return useMutation({
+    mutationFn: kisiGuncelle,
+    onSuccess: () => sorguIstemcisi.invalidateQueries({ queryKey: ['kisiler'] }),
+  });
+};
+
+// 2. KİŞİ SİL
+export const kisiSil = async (id: string): Promise<boolean> => {
+  const yanit = await apiIstemcisi.delete<IApiYaniti<null>>(`/users/${id}`);
+  return yanit.data.basarili;
+};
+
+export const useKisiSil = () => {
+  const sorguIstemcisi = useQueryClient();
+  return useMutation({
+    mutationFn: kisiSil,
+    onSuccess: () => sorguIstemcisi.invalidateQueries({ queryKey: ['kisiler'] }),
+  });
+};

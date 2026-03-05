@@ -1,9 +1,16 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Types } from 'mongoose';
 import { IUser, UserTitle } from '../types';
 
-export interface IUserDocument extends Omit<IUser, '_id'>, Document {}
+/**
+ * Mongoose döküman tipi için IUser arayüzünü genişletiyoruz.
+ * companyId frontend tarafında string olarak kullanılırken, 
+ * veritabanı seviyesinde Types.ObjectId olarak saklanır.
+ */
+export interface IUserDocument extends Omit<IUser, '_id' | 'companyId'>, Document {
+  companyId: Types.ObjectId;
+}
 
-// MongoDB veritabanı tablomuz
+// MongoDB veritabanı şeması
 const kisiVeritabaniSemasi = new Schema<IUserDocument>(
   {
     firstName: { type: String, required: true },
@@ -12,14 +19,14 @@ const kisiVeritabaniSemasi = new Schema<IUserDocument>(
     specialty: { type: String },
     phone: { type: String },
     email: { type: String },
-    // KRİTİK: Burada mongoose'a bu ID'nin 'Company' tablosuyla ilişkili olduğunu söylüyoruz (Relational DB mantığı)
+    // companyId artık IUserDocument içindeki Types.ObjectId ile tam uyumludur
     companyId: { type: Schema.Types.ObjectId, ref: 'Company', required: true },
     isActive: { type: Boolean, default: true },
   },
   {
-    timestamps: true,
+    timestamps: true, // createdAt ve updatedAt alanlarını otomatik yönetir
   }
 );
 
-// Model daha önce derlendiyse onu kullan, yoksa yeni oluştur
+// Model daha önce tanımlanmışsa onu kullan (Next.js Hot Reload desteği için kritik)
 export const UserModel = mongoose.models.User || mongoose.model<IUserDocument>('User', kisiVeritabaniSemasi);

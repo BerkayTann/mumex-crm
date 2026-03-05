@@ -1,74 +1,102 @@
 "use client";
 
 import React, { useState } from "react";
-import { useSirketleriGetir, useSirketEkle } from "../service";
+import {
+  useSirketleriGetir,
+  useSirketEkle,
+  useSirketGuncelle,
+  useSirketSil,
+} from "../service";
 import { CompanyList, CompanyForm } from "../components";
-import type { ISirketFormVerisi } from "../schema/CompanySchema";
-
-// Container bileşeni
+import { type ISirketFormVerisi } from "../schema/CompanySchema";
+import { ICompany } from "../types";
+import { ConfirmModal } from "@/components/common";
 
 export const CompanyListContainer = () => {
-  // UI State: Formun açık/kapalı olma durumunu tutuyoruz (Local State)
+  // --- UI DURUMLARI (STATE) ---
   const [formAcikMi, setFormAcikMi] = useState(false);
+  const [seciliSirket, setSeciliSirket] = useState<ICompany | null>(null);
+  const [silinecekSirketId, setSilinecekSirketId] = useState<string | null>(
+    null,
+  );
 
-  // 1. Veri çekme servisi (GET)
-  const {
-    data: sirketler,
-    isLoading: listeYukleniyor,
-    isError: hataMevcut,
-  } = useSirketleriGetir();
+  // --- SERVİSLER (REACT QUERY) ---
+  const { data: sirketler, isLoading: listeYukleniyor } = useSirketleriGetir();
+  const { mutateAsync: sirketEkle, isPending: ekleniyor } = useSirketEkle();
+  const { mutateAsync: sirketGuncelle, isPending: guncelleniyor } =
+    useSirketGuncelle();
+  const { mutateAsync: sirketSil, isPending: siliniyor } = useSirketSil();
 
-  // 2. Veri ekleme servisi (POST)
-  const { mutateAsync: sirketEkleMutasyonu, isPending: eklemeIslemiSuruyor } =
-    useSirketEkle();
+  // --- İŞ MANTIKLARI ---
 
-  // İş mantığı fonksiyonları (Türkçe)
-  const formuAc = () => setFormAcikMi(true);
-  const formuKapat = () => setFormAcikMi(false);
+  // 1. Yeni Ekleme veya Güncelleme Formunu Açma
+  const formuAc = (sirket?: ICompany) => {
+    setSeciliSirket(sirket || null);
+    setFormAcikMi(true);
+  };
 
-  const onYeniSirketKaydet = async (formVerisi: ISirketFormVerisi) => {
+  const formuKapat = () => {
+    setFormAcikMi(false);
+    setSeciliSirket(null);
+  };
+
+  // 2. Form Gönderildiğinde (Ekleme veya Güncelleme kararı)
+  const onSirketKaydet = async (formVerisi: ISirketFormVerisi) => {
     try {
-      // API'ye gönderiyoruz. useSirketEkle içindeki onSuccess tetiklenip listeyi otomatik yenileyecek!
-      await sirketEkleMutasyonu(formVerisi);
-      formuKapat(); // Başarılı olursa formu kapat
+      if (seciliSirket) {
+        // Düzenleme Modu
+        await sirketGuncelle({ id: seciliSirket._id, guncelVeri: formVerisi });
+      } else {
+        // Yeni Ekleme Modu
+        await sirketEkle(formVerisi);
+      }
+      formuKapat();
     } catch (hata) {
-      console.error("Şirket kaydedilirken hata oluştu:", hata);
-      alert("Kurum kaydedilemedi, lütfen tekrar deneyin.");
+      alert("İşlem başarısız oldu.");
     }
   };
 
-  // Yüklenme ve Hata Durumları
-  if (listeYukleniyor) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
+  // 3. Silme İşlemleri
+  const onSilmeOnayla = async () => {
+    if (!silinecekSirketId) return;
+    try {
+      await sirketSil(silinecekSirketId);
+      setSilinecekSirketId(null); // Modalı kapat
+    } catch (hata) {
+      alert("Silme işlemi başarısız.");
+    }
+  };
 
-  if (hataMevcut) {
-    return (
-      <div className="p-6 text-red-500 bg-red-50 rounded-lg m-6 border border-red-200">
-        Kurum verileri çekilirken bir hata oluştu.
-      </div>
-    );
-  }
+  if (listeYukleniyor)
+    return <div className="p-10 text-center">Yükleniyor...</div>;
 
   return (
     <div className="max-w-7xl mx-auto">
-      {/* Eğer form açıksa formu göster, kapalıysa listeyi göster */}
+      {/* SİLME ONAY MODALI */}
+      <ConfirmModal
+        acikMi={!!silinecekSirketId}
+        baslik="Kurumu Sil"
+        mesaj="Bu kurumu silmek istediğinize emin misiniz? Bu işlem geri alınamaz ve bu kuruma bağlı doktorların verileri etkilenebilir."
+        onIptal={() => setSilinecekSirketId(null)}
+        onOnayla={onSilmeOnayla}
+        yukleniyorMu={siliniyor}
+      />
+
       {formAcikMi ? (
         <div className="p-6 max-w-2xl mx-auto mt-10">
           <CompanyForm
-            onFormuGonder={onYeniSirketKaydet}
+            seciliSirket={seciliSirket}
+            onFormuGonder={onSirketKaydet}
             onIptalEt={formuKapat}
-            yukleniyorMu={eklemeIslemiSuruyor}
+            yukleniyorMu={ekleniyor || guncelleniyor}
           />
         </div>
       ) : (
         <CompanyList
           sirketler={sirketler || []}
-          onYeniSirketEkleTiklandi={formuAc}
+          onYeniSirketEkleTiklandi={() => formuAc()}
+          onDuzenleTiklandi={(sirket) => formuAc(sirket)}
+          onSilTiklandi={(id) => setSilinecekSirketId(id)}
         />
       )}
     </div>

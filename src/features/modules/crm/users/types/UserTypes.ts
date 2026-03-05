@@ -17,8 +17,8 @@ export interface IUser {
   email?: string;
   companyId: string; // KRİTİK ALAN: Bu kişinin çalıştığı Kurumun (Company) ID'si
   isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 // Yeni kayıt oluştururken _id ve tarihleri yollamayacağımız tip

@@ -27,3 +27,36 @@ export const useSirketEkle = () => {
     },
   });
 };
+
+export const sirketGuncelle = async ({ id, guncelVeri }: { id: string, guncelVeri: ICreateCompanyPayload }): Promise<ICompany> => {
+  const yanit = await apiIstemcisi.put<IApiYaniti<ICompany>>(`/companies/${id}`, guncelVeri);
+  return yanit.data.veri;
+};
+
+export const useSirketGuncelle = () => {
+  const sorguIstemcisi = useQueryClient();
+  return useMutation({
+    mutationFn: sirketGuncelle,
+    onSuccess: () => {
+      // Güncelleme başarılı olursa listeyi yenile
+      sorguIstemcisi.invalidateQueries({ queryKey: ['sirketler'] });
+    },
+  });
+};
+
+// 2. SİLME İŞLEMİ
+export const sirketSil = async (id: string): Promise<boolean> => {
+  const yanit = await apiIstemcisi.delete<IApiYaniti<null>>(`/companies/${id}`);
+  return yanit.data.basarili;
+};
+
+export const useSirketSil = () => {
+  const sorguIstemcisi = useQueryClient();
+  return useMutation({
+    mutationFn: sirketSil,
+    onSuccess: () => {
+      // Silme başarılı olursa listeyi yenile
+      sorguIstemcisi.invalidateQueries({ queryKey: ['sirketler'] });
+    },
+  });
+};

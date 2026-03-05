@@ -2,7 +2,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { kisiEklemeSemasi, IKisiFormVerisi } from "../schema/UserSchema";
-import { UserTitle } from "../types";
+import { IUser, UserTitle } from "../types";
 import { ICompany } from "../../company/types"; // Diğer modülden tip import ediyoruz
 
 interface IUserFormProps {
@@ -10,6 +10,7 @@ interface IUserFormProps {
   onFormuGonder: (veri: IKisiFormVerisi) => void;
   onIptalEt: () => void;
   yukleniyorMu: boolean;
+  ilkVeriler?: Partial<IUser>; // Düzenleme için başlangıç verileri
 }
 
 export const UserForm: React.FC<IUserFormProps> = ({
@@ -17,6 +18,7 @@ export const UserForm: React.FC<IUserFormProps> = ({
   onFormuGonder,
   onIptalEt,
   yukleniyorMu,
+  ilkVeriler,
 }) => {
   const {
     register,
@@ -24,6 +26,18 @@ export const UserForm: React.FC<IUserFormProps> = ({
     formState: { errors },
   } = useForm<IKisiFormVerisi>({
     resolver: zodResolver(kisiEklemeSemasi),
+    defaultValues: {
+      firstName: ilkVeriler?.firstName || "",
+      lastName: ilkVeriler?.lastName || "",
+      title: ilkVeriler?.title || UserTitle.DOCTOR,
+      specialty: ilkVeriler?.specialty || "",
+      companyId:
+        (ilkVeriler?.companyId as unknown as { _id: string })?._id ||
+        ilkVeriler?.companyId ||
+        "", // Populate edilmiş olabilir
+      email: ilkVeriler?.email || "",
+      phone: ilkVeriler?.phone || "",
+    },
   });
 
   return (
@@ -32,7 +46,9 @@ export const UserForm: React.FC<IUserFormProps> = ({
       className="space-y-4 bg-white p-8 rounded-xl border border-slate-200 shadow-lg"
     >
       <h2 className="text-xl font-bold text-slate-800 mb-6">
-        Yeni Kişi/Doktor Kaydı
+        {ilkVeriler
+          ? "Kişi/Doktor Bilgilerini Güncelle"
+          : "Yeni Kişi/Doktor Kaydı"}
       </h2>
 
       <div className="grid grid-cols-2 gap-4">

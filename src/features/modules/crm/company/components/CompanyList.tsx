@@ -1,17 +1,21 @@
 import React from "react";
 import { ICompany, CompanyType } from "../types";
-import { Building2, PlusCircle } from "lucide-react";
+import { Building2, PlusCircle, Pencil, Trash2 } from "lucide-react";
 
 // Bileşenin dışarıdan alacağı verilerin (props) tipini belirliyoruz
 interface ICompanyListProps {
   sirketler: ICompany[];
   onYeniSirketEkleTiklandi: () => void; // Butona tıklanma olayını (event) yukarıya (Container'a) iletiyoruz
+  onDuzenleTiklandi: (sirket: ICompany) => void; // Düzenleme olayını yukarıya iletiyoruz
+  onSilTiklandi: (id: string) => void; // Silme olayını yukarıya iletiyoruz
 }
 
 // Saf bileşenimiz (İngilizce isim, içerideki mantık Türkçe)
 export const CompanyList: React.FC<ICompanyListProps> = ({
   sirketler,
   onYeniSirketEkleTiklandi,
+  onDuzenleTiklandi,
+  onSilTiklandi,
 }) => {
   return (
     <div className="p-6">
@@ -56,6 +60,24 @@ export const CompanyList: React.FC<ICompanyListProps> = ({
               {sirket.phone && (
                 <p className="text-sm text-slate-500">📞 {sirket.phone}</p>
               )}
+
+              {/* YENİ: Aksiyon Butonları */}
+              <div className="flex justify-end gap-2 mt-4 pt-3 border-t border-slate-100">
+                <button
+                  onClick={() => onDuzenleTiklandi(sirket)}
+                  className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                  title="Düzenle"
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => onSilTiklandi(sirket._id)}
+                  className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                  title="Sil"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           ))}
         </div>
