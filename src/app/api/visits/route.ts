@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { veritabaninaBaglan } from '@/lib/dbConnect';
 import { ziyaretEklemeSemasi } from '@/features/modules/crm/visit/schema';
-import { VisitModel } from '@/features/modules/crm/visit/schema/VisitModal';
+import { VisitModel } from '@/features/modules/crm/visit/schema/VisitModel';
 
 // Populate işlemi için diğer modellerin bellekte derlenmiş olması ZORUNLUDUR
 import '@/features/modules/crm/company/schema/CompanyModel';

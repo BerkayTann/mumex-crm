@@ -10,6 +10,7 @@ export const kisiEklemeSemasi = z.object({
   phone: z.string().optional(),
   // E-posta ya geçerli bir formatta olmalı ya da tamamen boş bırakılabilmeli
   email: z.string().email({ message: "Geçerli bir e-posta giriniz." }).optional().or(z.literal('')),
+  address: z.string().optional().or(z.literal('')), 
   companyId: z.string().min(1, { message: "Lütfen kişinin çalıştığı kurumu seçiniz." }),
   isActive: z.boolean().default(true),
 });

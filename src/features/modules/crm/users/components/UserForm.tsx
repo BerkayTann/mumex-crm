@@ -23,6 +23,7 @@ export const UserForm: React.FC<IUserFormProps> = ({
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<IKisiFormVerisi>({
     resolver: zodResolver(kisiEklemeSemasi),
@@ -37,8 +38,28 @@ export const UserForm: React.FC<IUserFormProps> = ({
         "", // Populate edilmiş olabilir
       email: ilkVeriler?.email || "",
       phone: ilkVeriler?.phone || "",
+      address: ilkVeriler?.address || "",
     },
   });
+
+  // Veriler değiştiğinde formu resetle
+  React.useEffect(() => {
+    if (ilkVeriler) {
+      reset({
+        firstName: ilkVeriler.firstName || "",
+        lastName: ilkVeriler.lastName || "",
+        title: ilkVeriler.title || UserTitle.DOCTOR,
+        specialty: ilkVeriler.specialty || "",
+        companyId:
+          (ilkVeriler.companyId as unknown as { _id: string })?._id ||
+          (ilkVeriler.companyId as string) ||
+          "",
+        email: ilkVeriler.email || "",
+        phone: ilkVeriler.phone || "",
+        address: ilkVeriler.address || "",
+      });
+    }
+  }, [ilkVeriler, reset]);
 
   return (
     <form
@@ -122,6 +143,42 @@ export const UserForm: React.FC<IUserFormProps> = ({
           placeholder="Örn: Kardiyoloji"
           className="w-full p-2 border rounded-md"
         />
+      </div>
+
+      {/* YENİ EKLENEN İLETİŞİM VE ADRES BÖLÜMÜ */}
+      <h3 className="text-md font-bold text-slate-700 mt-6 border-b pb-2">
+        İletişim ve Adres
+      </h3>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">Telefon</label>
+          <input
+            {...register("phone")}
+            className="w-full p-2 border rounded-md"
+            placeholder="05XX XXX XX XX"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">E-Posta</label>
+          <input
+            {...register("email")}
+            type="email"
+            className="w-full p-2 border rounded-md"
+            placeholder="ornek@hastane.com"
+          />
+          {errors.email && (
+            <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
+          )}
+        </div>
+        <div className="col-span-2">
+          <label className="block text-sm font-medium mb-1">Açık Adres</label>
+          <textarea
+            {...register("address")}
+            rows={2}
+            className="w-full p-2 border rounded-md"
+            placeholder="Mahalle, Sokak, No..."
+          ></textarea>
+        </div>
       </div>
 
       <div className="flex justify-end gap-3 mt-6">

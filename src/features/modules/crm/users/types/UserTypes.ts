@@ -15,6 +15,7 @@ export interface IUser {
   specialty?: string; // Uzmanlık alanı (Örn: Kardiyoloji, Dahiliye)
   phone?: string;
   email?: string;
+  address?: string;
   companyId: string; // KRİTİK ALAN: Bu kişinin çalıştığı Kurumun (Company) ID'si
   isActive: boolean;
   createdAt: Date;

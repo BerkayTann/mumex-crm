@@ -1,3 +1,5 @@
+import { Bolgeler } from "@/core/constants/regions";
+
 // Kurum tiplerini standartlaştırdığımız Enum yapısı
 export enum CompanyType {
   HOSPITAL = 'HOSPITAL',
@@ -11,6 +13,8 @@ export interface ICompany {
   name: string;
   type: CompanyType;
   city: string;
+  district?: string;
+  region?: Bolgeler;
   address?: string; // Soru işareti (?) bu alanın zorunlu olmadığını belirtir
   phone?: string;
   isActive: boolean;

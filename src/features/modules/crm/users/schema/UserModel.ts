@@ -19,6 +19,7 @@ const kisiVeritabaniSemasi = new Schema<IUserDocument>(
     specialty: { type: String },
     phone: { type: String },
     email: { type: String },
+    address: { type: String },
     // companyId artık IUserDocument içindeki Types.ObjectId ile tam uyumludur
     companyId: { type: Schema.Types.ObjectId, ref: 'Company', required: true },
     isActive: { type: Boolean, default: true },
