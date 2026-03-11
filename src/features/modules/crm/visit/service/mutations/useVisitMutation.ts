@@ -20,8 +20,36 @@ export const useZiyaretEkle = () => {
     mutationFn: ziyaretEkle,
     onSuccess: () => {
       sorguIstemcisi.invalidateQueries({ queryKey: ['ziyaretler'] });
-      // Bir ziyaret eklendiğinde, doktorların veya kurumların istatistikleri de değişeceği için 
-      // ileride o query'leri de burada invalidate edeceğiz (tazeleyeceğiz).
+      sorguIstemcisi.invalidateQueries({ queryKey: ['kisiler'] });
+    },
+  });
+};
+
+export const useZiyaretSil = () => {
+  const sorguIstemcisi = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await apiIstemcisi.delete(`/visits/${id}`);
+    },
+    onSuccess: () => {
+      sorguIstemcisi.invalidateQueries({ queryKey: ['ziyaretler'] });
+      sorguIstemcisi.invalidateQueries({ queryKey: ['kisiler'] });
+    },
+  });
+};
+
+export const useZiyaretGuncelle = () => {
+  const sorguIstemcisi = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, veri }: { id: string; veri: ICreateVisitPayload }) => {
+      const yanit = await apiIstemcisi.put<IApiYaniti<IVisit>>(`/visits/${id}`, veri);
+      return yanit.data.veri;
+    },
+    onSuccess: () => {
+      sorguIstemcisi.invalidateQueries({ queryKey: ['ziyaretler'] });
+      sorguIstemcisi.invalidateQueries({ queryKey: ['kisiler'] });
     },
   });
 };

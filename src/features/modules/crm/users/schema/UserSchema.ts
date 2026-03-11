@@ -18,6 +18,7 @@ export const kisiEklemeSemasi = z.object({
   sirketTipi: z.nativeEnum(CompanyType, { message: "Geçerli bir kurum tipi seçiniz." }),
   sehir: z.string().min(2, { message: "Şehir alanı zorunludur." }),
   ilce: z.string().optional(),
+  forceNewCompany: z.boolean().optional().default(false),
 });
 
 export type IKisiFormVerisi = z.infer<typeof kisiEklemeSemasi>;

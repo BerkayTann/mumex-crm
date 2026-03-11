@@ -8,11 +8,13 @@ export enum ProductCategory {
 
 
 //Frontend ve Backendin ortak dili olan arayüz
-export interface IProduct { 
+export interface IProduct {
     _id: string;
     name: string;
     category: ProductCategory;
     price: number;
+    currency?: string;      // "TRY" | "USD" | "EUR" vb. — default "TRY"
+    priceInTRY?: number;    // Kayıt anındaki TRY karşılığı (live kur ile hesaplanır)
     description: string;
     isActive: boolean;
     createdAt: Date;

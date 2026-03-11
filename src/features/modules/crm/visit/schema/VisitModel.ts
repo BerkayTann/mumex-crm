@@ -11,6 +11,8 @@ export interface IVisitDocument extends Omit<IVisit, '_id' | 'companyId' | 'user
     productId: mongoose.Types.ObjectId;
     quantity: number;
     unitPrice: number;
+    unitPriceInTRY?: number;
+    currency?: string;
     totalPrice: number;
   }[];
 }
@@ -20,6 +22,8 @@ const visitProductDbSchema = new Schema({
   productId: { type: Schema.Types.ObjectId, ref: 'Product', required: true },
   quantity: { type: Number, required: true, min: 1 },
   unitPrice: { type: Number, required: true, min: 0 },
+  unitPriceInTRY: { type: Number, min: 0 },
+  currency: { type: String, default: 'TRY' },
   totalPrice: { type: Number, required: true, min: 0 }
 });
 

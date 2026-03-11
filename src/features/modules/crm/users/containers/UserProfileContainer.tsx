@@ -3,6 +3,7 @@
 import React from "react";
 import { useKullaniciProfiliGetir } from "../service/queries/useUserProfileQueries";
 import { Bolgeler, BolgeTemalari } from "@/core/constants/regions";
+import { ildenBolgeGetir } from "@/core/constants/cities";
 import {
   MapPin,
   Phone,
@@ -39,7 +40,12 @@ export const UserProfileContainer: React.FC<IProps> = ({ userId }) => {
 
   const { doktor, analiz, gecmisZiyaretler } = profil;
   const kurum = doktor.companyId || {};
-  const bolge = (kurum as { region?: Bolgeler }).region;
+  const kurumTyped = kurum as { region?: Bolgeler; city?: string; name?: string };
+
+  // Bölge: önce DB'den al, yoksa şehir adından hesapla
+  const bolge: Bolgeler | undefined =
+    kurumTyped.region ||
+    (kurumTyped.city ? (ildenBolgeGetir(kurumTyped.city) as Bolgeler | undefined) : undefined);
 
   // Bölgeye özgü tema
   const tema =
@@ -47,13 +53,13 @@ export const UserProfileContainer: React.FC<IProps> = ({ userId }) => {
       ? BolgeTemalari[bolge]
       : { gradient: "from-slate-700 via-slate-600 to-slate-500", desen: "🏥", slogan: "Türkiye Geneli" };
 
-  // Segment bilgisi (profil API'sinden veya basit label)
+  // Segment bilgisi
   const segmentBilgisi = SEGMENT_ETIKET[analiz.segment?.charAt(0) || "C"] || SEGMENT_ETIKET["C"];
 
   return (
     <div className="w-full space-y-6">
       {/* 1. KART: Bölge Temalı Hero Banner */}
-      <div className={`relative overflow-hidden rounded-2xl shadow-xl text-white p-8 bg-linear-to-br ${tema.gradient}`}>
+      <div className={`relative overflow-hidden rounded-2xl shadow-xl text-white p-6 sm:p-8 bg-linear-to-br ${tema.gradient}`}>
 
         {/* Dekoratif arka plan desen */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -67,51 +73,54 @@ export const UserProfileContainer: React.FC<IProps> = ({ userId }) => {
           <div className="absolute left-0 bottom-0 w-48 h-48 rounded-full bg-black/10 translate-y-1/3 -translate-x-1/3" />
         </div>
 
-        {/* SAĞ ÜST: İl + Bölge */}
-        <div className="absolute top-6 right-6 flex flex-col items-end gap-2">
-          <div className="flex items-center gap-1 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-semibold tracking-wider">
-            <MapPin className="w-4 h-4" />
-            {(kurum as { city?: string }).city?.toUpperCase() || "İL BİLİNMİYOR"}
+        {/* ANA İÇERİK — flex layout, mobil uyumlu */}
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          {/* SOL: İsim, ünvan, kurum, iletişim */}
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              <span className="bg-white/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest">
+                {doktor.title}
+              </span>
+              <span className={`flex items-center gap-1 ${segmentBilgisi.bg} ${segmentBilgisi.text} px-3 py-1 rounded-full text-xs font-bold shadow-sm`}>
+                <Award className="w-4 h-4" />
+                {segmentBilgisi.label}
+              </span>
+            </div>
+
+            <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight mb-2 drop-shadow">
+              {doktor.firstName} {doktor.lastName}
+            </h1>
+            <p className="text-base sm:text-lg opacity-90 mb-4 flex items-center gap-2">
+              {kurumTyped.name || "Bağımsız"}
+              <span className="text-sm opacity-75">
+                ({doktor.specialty || "Uzmanlık Belirtilmemiş"})
+              </span>
+            </p>
+
+            <div className="flex flex-wrap gap-3 text-sm font-medium">
+              {doktor.phone && (
+                <div className="flex items-center gap-2 bg-white/15 px-3 py-1.5 rounded-full">
+                  <Phone className="w-4 h-4" /> {doktor.phone}
+                </div>
+              )}
+              {doktor.email && (
+                <div className="flex items-center gap-2 bg-white/15 px-3 py-1.5 rounded-full">
+                  <Mail className="w-4 h-4" /> {doktor.email}
+                </div>
+              )}
+            </div>
           </div>
-          {bolge && (
-            <span className="text-xs bg-white/15 px-3 py-1 rounded-full font-medium">
-              {tema.slogan}
-            </span>
-          )}
-        </div>
 
-        {/* ANA İÇERİK */}
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-3">
-            <span className="bg-white/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest">
-              {doktor.title}
-            </span>
-            <span className={`flex items-center gap-1 ${segmentBilgisi.bg} ${segmentBilgisi.text} px-3 py-1 rounded-full text-xs font-bold shadow-sm`}>
-              <Award className="w-4 h-4" />
-              {segmentBilgisi.label}
-            </span>
-          </div>
-
-          <h1 className="text-4xl font-extrabold tracking-tight mb-2 drop-shadow">
-            {doktor.firstName} {doktor.lastName}
-          </h1>
-          <p className="text-lg opacity-90 mb-6 flex items-center gap-2">
-            {(kurum as { name?: string }).name || "Bağımsız"}
-            <span className="text-sm opacity-75">
-              ({doktor.specialty || "Uzmanlık Belirtilmemiş"})
-            </span>
-          </p>
-
-          <div className="flex gap-6 text-sm font-medium">
-            {doktor.phone && (
-              <div className="flex items-center gap-2 bg-white/15 px-3 py-1.5 rounded-full">
-                <Phone className="w-4 h-4" /> {doktor.phone}
-              </div>
-            )}
-            {doktor.email && (
-              <div className="flex items-center gap-2 bg-white/15 px-3 py-1.5 rounded-full">
-                <Mail className="w-4 h-4" /> {doktor.email}
-              </div>
+          {/* SAĞ: İl + Bölge (mobilde üstte, desktop'ta sağda) */}
+          <div className="flex sm:flex-col items-start sm:items-end gap-2 shrink-0">
+            <div className="flex items-center gap-1 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-semibold tracking-wider">
+              <MapPin className="w-4 h-4" />
+              {kurumTyped.city?.toUpperCase() || "İL BİLİNMİYOR"}
+            </div>
+            {bolge && (
+              <span className="text-xs bg-white/15 px-3 py-1 rounded-full font-medium">
+                {tema.slogan}
+              </span>
             )}
           </div>
         </div>

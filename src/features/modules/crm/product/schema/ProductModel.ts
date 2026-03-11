@@ -13,6 +13,8 @@ const urunVeritabaniSemasi = new Schema<IProductDocument>(
     },
     // Veritabanına fiyat sütunu zorunlu (required) olarak eklendi
     price: { type: Number, required: true },
+    currency: { type: String, default: 'TRY' },
+    priceInTRY: { type: Number },
     description: { type: String },
     isActive: { type: Boolean, default: true },
   },

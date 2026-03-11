@@ -22,13 +22,37 @@ export async function PUT(istek: NextRequest, { params }: IRouteParams) {
       return NextResponse.json({ basarili: false, mesaj: 'Geçersiz veri.' }, { status: 400 });
     }
 
-    const { sirketAdi, sirketTipi, sehir, ilce, ...kisiVerisi } = dogrulamaSonucu.data;
+    const { sirketAdi, sirketTipi, sehir, ilce, forceNewCompany = false, ...kisiVerisi } =
+      dogrulamaSonucu.data;
 
     const bolge = ildenBolgeGetir(sehir);
+    const temizIsim = sirketAdi.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const nameRegex = new RegExp(`^${temizIsim}$`, 'i');
+    const benzerKurumlar = await CompanyModel.find({ name: { $regex: nameRegex } });
 
-    let kurum = await CompanyModel.findOne({
-      name: { $regex: new RegExp(`^${sirketAdi.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
-    });
+    const ayniSehirdeKurum = benzerKurumlar.find(
+      (k) => k.city?.toLowerCase().trim() === sehir.toLowerCase().trim(),
+    );
+
+    let kurum = ayniSehirdeKurum;
+
+    // Aynı isim farklı şehirdeyse, önce onay iste
+    if (!kurum && benzerKurumlar.length > 0 && !forceNewCompany) {
+      return NextResponse.json(
+        {
+          basarili: false,
+          mesaj:
+            'Bu isimdeki kurum farklı bir şehirde zaten kayıtlı. Yeni kurum olarak oluşturmak ister misiniz?',
+          kod: 'DUPLICATE_COMPANY_DIFFERENT_CITY',
+          mevcutKayitlar: benzerKurumlar.map((k) => ({
+            id: k._id,
+            city: k.city,
+            district: k.district,
+          })),
+        },
+        { status: 409 },
+      );
+    }
 
     if (!kurum) {
       kurum = await CompanyModel.create({
@@ -44,9 +68,10 @@ export async function PUT(istek: NextRequest, { params }: IRouteParams) {
     const guncellenenKisi = await UserModel.findByIdAndUpdate(
       id,
       { ...kisiVerisi, companyId: new mongoose.Types.ObjectId(String(kurum._id)) },
-      { new: true }
+      { new: true },
     );
-    if (!guncellenenKisi) return NextResponse.json({ basarili: false, mesaj: 'Kişi bulunamadı.' }, { status: 404 });
+    if (!guncellenenKisi)
+      return NextResponse.json({ basarili: false, mesaj: 'Kişi bulunamadı.' }, { status: 404 });
 
     return NextResponse.json({ basarili: true, veri: guncellenenKisi }, { status: 200 });
   } catch (hata) {
@@ -60,7 +85,8 @@ export async function DELETE(istek: NextRequest, { params }: IRouteParams) {
     const { id } = await params;
     await veritabaninaBaglan();
     const silinenKisi = await UserModel.findByIdAndDelete(id);
-    if (!silinenKisi) return NextResponse.json({ basarili: false, mesaj: 'Kişi bulunamadı.' }, { status: 404 });
+    if (!silinenKisi)
+      return NextResponse.json({ basarili: false, mesaj: 'Kişi bulunamadı.' }, { status: 404 });
 
     return NextResponse.json({ basarili: true, mesaj: 'Başarıyla silindi.' }, { status: 200 });
   } catch (hata) {

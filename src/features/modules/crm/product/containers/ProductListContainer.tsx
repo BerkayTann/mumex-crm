@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-// Barrel export (index.ts) üzerinden temiz import
 import {
   useUrunleriGetir,
   useUrunEkle,
@@ -15,26 +14,15 @@ import { ConfirmModal } from "@/components/common/ConfirmModal";
 
 export const ProductListContainer = () => {
   const [formAcikMi, setFormAcikMi] = useState(false);
-  const [duzenlenecekUrun, setDuzenlenecekUrun] = useState<IProduct | null>(
-    null,
-  );
+  const [duzenlenecekUrun, setDuzenlenecekUrun] = useState<IProduct | null>(null);
   const [silinecekUrunId, setSilinecekUrunId] = useState<string | null>(null);
 
-  const {
-    data: urunler,
-    isLoading: listeYukleniyor,
-    isError: hataMevcut,
-  } = useUrunleriGetir();
+  const { data: urunler, isLoading: listeYukleniyor, isError: hataMevcut } = useUrunleriGetir();
 
-  // Mutasyonlar
-  const { mutateAsync: urunEkleMutasyonu, isPending: eklemeIslemiSuruyor } =
-    useUrunEkle();
-  const { mutateAsync: urunSilMutasyonu, isPending: silmeIslemiSuruyor } =
-    useUrunSil();
-  const {
-    mutateAsync: urunGuncelleMutasyonu,
-    isPending: guncellemeIslemiSuruyor,
-  } = useUrunGuncelle();
+  const { mutateAsync: urunEkleMutasyonu, isPending: eklemeIslemiSuruyor } = useUrunEkle();
+  const { mutateAsync: urunSilMutasyonu, isPending: silmeIslemiSuruyor } = useUrunSil();
+  const { mutateAsync: urunGuncelleMutasyonu, isPending: guncellemeIslemiSuruyor } =
+    useUrunGuncelle();
 
   const onUrunKaydet = async (formVerisi: IUrunFormVerisi) => {
     try {
@@ -47,13 +35,8 @@ export const ProductListContainer = () => {
       };
 
       if (duzenlenecekUrun) {
-        // GÜNCELLEME
-        await urunGuncelleMutasyonu({
-          id: duzenlenecekUrun._id,
-          guncelVeri: payload,
-        });
+        await urunGuncelleMutasyonu({ id: duzenlenecekUrun._id, guncelVeri: payload });
       } else {
-        // YENİ KAYIT
         await urunEkleMutasyonu(payload);
       }
 
@@ -65,12 +48,10 @@ export const ProductListContainer = () => {
     }
   };
 
-  // Silme işlemini başlatan fonksiyon
   const onUrunSilTiklandi = (id: string) => {
     setSilinecekUrunId(id);
   };
 
-  // Silme işlemini onaylayan (API'ye gönderen) fonksiyon
   const onSilmeOnayla = async () => {
     if (!silinecekUrunId) return;
     try {
@@ -81,7 +62,6 @@ export const ProductListContainer = () => {
     }
   };
 
-  // Düzenleme modunu açan fonksiyon
   const onUrunDuzenleTiklandi = (urun: IProduct) => {
     setDuzenlenecekUrun(urun);
     setFormAcikMi(true);
@@ -97,15 +77,14 @@ export const ProductListContainer = () => {
 
   if (hataMevcut) {
     return (
-      <div className="p-6 text-red-500 bg-red-50 rounded-lg m-6 border border-red-200">
+      <div className="p-4 text-red-500 bg-red-50 rounded-lg mx-4 border border-red-200">
         Veriler çekilirken hata oluştu.
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto">
-      {/* SİLME ONAY MODALI */}
+    <div className="w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
       <ConfirmModal
         acikMi={!!silinecekUrunId}
         baslik="Ürünü Sil"
@@ -116,7 +95,7 @@ export const ProductListContainer = () => {
       />
 
       {formAcikMi ? (
-        <div className="p-6 max-w-2xl mx-auto mt-10">
+        <div className="p-4 sm:p-6 max-w-3xl mx-auto mt-4">
           <ProductForm
             onFormuGonder={onUrunKaydet}
             onIptalEt={() => {

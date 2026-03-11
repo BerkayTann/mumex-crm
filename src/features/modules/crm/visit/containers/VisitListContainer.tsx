@@ -1,36 +1,65 @@
 "use client";
 
 import React, { useState } from "react";
-import { useZiyaretleriGetir, useZiyaretEkle } from "../service";
+import { useZiyaretleriGetir, useZiyaretEkle, useZiyaretSil, useZiyaretGuncelle } from "../service";
 import { useSirketleriGetir } from "../../company/service";
 import { useKisileriGetir } from "../../users/service";
 import { useUrunleriGetir } from "../../product/service";
 import { VisitList, VisitForm } from "../components";
+import { IVisit } from "../types";
 import { IVisitFormVerisi } from "../schema/VisitSchema";
+import { ConfirmModal } from "@/components/common/ConfirmModal";
 
 export const VisitListContainer = () => {
   const [formAcikMi, setFormAcikMi] = useState(false);
+  const [duzenlenecekZiyaret, setDuzenlenecekZiyaret] = useState<IVisit | null>(null);
+  const [silinecekZiyaretId, setSilinecekZiyaretId] = useState<string | null>(null);
 
-  // Mimarın Şovu: 4 farklı kaynaktan aynı anda veri çekiyoruz!
   const { data: ziyaretler, isLoading: zYukleniyor } = useZiyaretleriGetir();
   const { data: sirketler, isLoading: sYukleniyor } = useSirketleriGetir();
   const { data: kisiler, isLoading: kYukleniyor } = useKisileriGetir();
   const { data: urunler, isLoading: uYukleniyor } = useUrunleriGetir();
 
-  const { mutateAsync: ziyaretEkle, isPending: kaydediliyor } =
-    useZiyaretEkle();
+  const { mutateAsync: ziyaretEkle, isPending: ekleniyor } = useZiyaretEkle();
+  const { mutateAsync: ziyaretGuncelle, isPending: guncelleniyor } = useZiyaretGuncelle();
+  const { mutateAsync: ziyaretSil, isPending: siliniyor } = useZiyaretSil();
 
   const onZiyaretKaydet = async (veri: IVisitFormVerisi) => {
     try {
-      await ziyaretEkle(veri);
+      if (duzenlenecekZiyaret) {
+        await ziyaretGuncelle({ id: duzenlenecekZiyaret._id, veri });
+      } else {
+        await ziyaretEkle(veri);
+      }
       setFormAcikMi(false);
-    } catch (hata) {
+      setDuzenlenecekZiyaret(null);
+    } catch {
       alert("Ziyaret kaydedilemedi.");
     }
   };
 
-  const sayfaYukleniyor =
-    zYukleniyor || sYukleniyor || kYukleniyor || uYukleniyor;
+  const onDuzenleTiklandi = (ziyaret: IVisit) => {
+    setDuzenlenecekZiyaret(ziyaret);
+    setFormAcikMi(true);
+  };
+
+  const onSilOnaylandi = async () => {
+    if (!silinecekZiyaretId) return;
+    try {
+      await ziyaretSil(silinecekZiyaretId);
+    } catch {
+      alert("Ziyaret silinemedi.");
+    } finally {
+      setSilinecekZiyaretId(null);
+    }
+  };
+
+  const onFormIptal = () => {
+    setFormAcikMi(false);
+    setDuzenlenecekZiyaret(null);
+  };
+
+  const sayfaYukleniyor = zYukleniyor || sYukleniyor || kYukleniyor || uYukleniyor;
 
   if (sayfaYukleniyor) {
     return (
@@ -41,24 +70,36 @@ export const VisitListContainer = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
       {formAcikMi ? (
-        <div className="p-6 max-w-4xl mx-auto mt-6">
+        <div className="p-4 sm:p-6 max-w-4xl mx-auto mt-4">
           <VisitForm
             sirketler={sirketler || []}
             kisiler={kisiler || []}
             urunler={urunler || []}
             onFormuGonder={onZiyaretKaydet}
-            onIptalEt={() => setFormAcikMi(false)}
-            yukleniyorMu={kaydediliyor}
+            onIptalEt={onFormIptal}
+            yukleniyorMu={ekleniyor || guncelleniyor}
+            ilkVeriler={duzenlenecekZiyaret || undefined}
           />
         </div>
       ) : (
         <VisitList
           ziyaretler={ziyaretler || []}
           onYeniZiyaretEkleTiklandi={() => setFormAcikMi(true)}
+          onDuzenleTiklandi={onDuzenleTiklandi}
+          onSilTiklandi={(id) => setSilinecekZiyaretId(id)}
         />
       )}
+
+      <ConfirmModal
+        acikMi={!!silinecekZiyaretId}
+        baslik="Ziyareti Sil"
+        mesaj="Bu ziyaret kaydını kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
+        onOnayla={onSilOnaylandi}
+        onIptal={() => setSilinecekZiyaretId(null)}
+        yukleniyorMu={siliniyor}
+      />
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import { LucideIcon } from "lucide-react";
 import React from "react";
+import Link from "next/link";
 
 interface IStatCardProps {
   baslik: string;
@@ -7,6 +8,7 @@ interface IStatCardProps {
   Ikon: LucideIcon;
   renkClass: string;
   altMetin?: string;
+  href?: string;
 }
 
 export const StatCard: React.FC<IStatCardProps> = ({
@@ -15,9 +17,10 @@ export const StatCard: React.FC<IStatCardProps> = ({
   altMetin,
   Ikon,
   renkClass,
+  href,
 }) => {
-  return (
-    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
+  const icerik = (
+    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4 hover:shadow-md transition-shadow h-full">
       <div
         className={`w-14 h-14 rounded-full flex items-center justify-center ${renkClass} bg-opacity-10`}
       >
@@ -32,4 +35,10 @@ export const StatCard: React.FC<IStatCardProps> = ({
       </div>
     </div>
   );
+
+  if (href) {
+    return <Link href={href} className="block h-full">{icerik}</Link>;
+  }
+
+  return icerik;
 };

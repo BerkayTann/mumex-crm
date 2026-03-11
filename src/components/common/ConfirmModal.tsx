@@ -1,5 +1,5 @@
 import React from "react";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Info } from "lucide-react";
 
 interface IConfirmModalProps {
   acikMi: boolean;
@@ -8,6 +8,9 @@ interface IConfirmModalProps {
   onOnayla: () => void;
   onIptal: () => void;
   yukleniyorMu?: boolean;
+  onayMetni?: string;
+  yukleniyorMetni?: string;
+  onayTipi?: "tehlikeli" | "bilgi";
 }
 
 export const ConfirmModal: React.FC<IConfirmModalProps> = ({
@@ -17,15 +20,23 @@ export const ConfirmModal: React.FC<IConfirmModalProps> = ({
   onOnayla,
   onIptal,
   yukleniyorMu,
+  onayMetni = "Evet, Sil",
+  yukleniyorMetni = "Siliniyor...",
+  onayTipi = "tehlikeli",
 }) => {
   if (!acikMi) return null;
+
+  const bilgiMi = onayTipi === "bilgi";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 animate-in fade-in zoom-in duration-200">
         <div className="flex items-center gap-4 mb-4">
-          <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-            <AlertTriangle className="w-5 h-5 text-red-600" />
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${bilgiMi ? "bg-indigo-100" : "bg-red-100"}`}>
+            {bilgiMi
+              ? <Info className="w-5 h-5 text-indigo-600" />
+              : <AlertTriangle className="w-5 h-5 text-red-600" />
+            }
           </div>
           <h3 className="text-xl font-bold text-slate-800">{baslik}</h3>
         </div>
@@ -42,9 +53,9 @@ export const ConfirmModal: React.FC<IConfirmModalProps> = ({
           <button
             onClick={onOnayla}
             disabled={yukleniyorMu}
-            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors disabled:opacity-50"
+            className={`px-4 py-2 text-white rounded-md transition-colors disabled:opacity-50 ${bilgiMi ? "bg-indigo-600 hover:bg-indigo-700" : "bg-red-600 hover:bg-red-700"}`}
           >
-            {yukleniyorMu ? "Siliniyor..." : "Evet, Sil"}
+            {yukleniyorMu ? yukleniyorMetni : onayMetni}
           </button>
         </div>
       </div>

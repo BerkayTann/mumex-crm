@@ -10,10 +10,12 @@ export enum VisitStatus {
 
 // KRİTİK: Ziyaretin içinde satılan tek bir ürünün yapısı (Tarihe Mühür Vurulan Yer!)
 export interface IVisitProduct {
-  productId: string; // Hangi ürün satıldı?
-  quantity: number;  // Kaç adet satıldı?
-  unitPrice: number; // Satıldığı andaki birim fiyatı (Snapshot)
-  totalPrice: number; // quantity * unitPrice (Satır toplamı)
+  productId: string;          // Hangi ürün satıldı?
+  quantity: number;           // Kaç adet satıldı?
+  unitPrice: number;          // Satıldığı andaki birim fiyatı - ürünün KENDİ dövizinde (Snapshot)
+  unitPriceInTRY?: number;    // Satış anındaki TRY karşılığı (Snapshot)
+  currency?: string;          // Satış anındaki döviz cinsi, örn. "USD" (Snapshot)
+  totalPrice: number;         // quantity * unitPriceInTRY — her zaman TRY (Satır toplamı)
 }
 
 // Ana Ziyaret Objemiz

@@ -47,6 +47,7 @@ export const UserForm: React.FC<IUserFormProps> = ({
       sirketTipi: kurum?.type || CompanyType.HOSPITAL,
       sehir: kurum?.city || "",
       ilce: kurum?.district || "",
+      forceNewCompany: false,
     },
   });
 
@@ -74,6 +75,7 @@ export const UserForm: React.FC<IUserFormProps> = ({
         sirketTipi: kurum?.type || CompanyType.HOSPITAL,
         sehir: kurum?.city || "",
         ilce: kurum?.district || "",
+        forceNewCompany: false,
       });
     }
   }, [ilkVeriler, reset, kurum?.name, kurum?.type, kurum?.city, kurum?.district]);

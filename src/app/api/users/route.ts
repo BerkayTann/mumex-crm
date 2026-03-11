@@ -26,19 +26,6 @@ export async function GET() {
         },
       },
       {
-        $addFields: {
-          segment: {
-            $switch: {
-              branches: [
-                { case: { $gt: ['$toplamCiro', 50000] }, then: 'A' },
-                { case: { $gt: ['$toplamCiro', 10000] }, then: 'B' },
-              ],
-              default: 'C',
-            },
-          },
-        },
-      },
-      {
         $lookup: {
           from: 'companies',
           localField: 'companyId',
@@ -52,17 +39,40 @@ export async function GET() {
         },
       },
       {
-        $project: { ziyaretler: 0, companyData: 0, toplamCiro: 0 },
+        $project: { ziyaretler: 0, companyData: 0 },
       },
       { $sort: { createdAt: -1 } },
     ]);
+
+    // ABC Katkı Payı Analizi:
+    // A → Toplam cironun ilk %70'ini oluşturanlar ("garantili alıcılar")
+    // B → %70-%90 arası ("gelişmekte")
+    // C → Kalan + sıfır ciro ("potansiyel / geliştirilmeli")
+    const satisYapanlar = (kisiler as any[])
+      .filter((k) => k.toplamCiro > 0)
+      .sort((a, b) => b.toplamCiro - a.toplamCiro);
+
+    const genelToplam: number = satisYapanlar.reduce((s, k) => s + k.toplamCiro, 0);
+    let kumulatif = 0;
+
+    satisYapanlar.forEach((kisi) => {
+      kumulatif += kisi.toplamCiro;
+      const oran = genelToplam > 0 ? kumulatif / genelToplam : 1;
+      kisi.segment = oran <= 0.70 ? 'A' : oran <= 0.90 ? 'B' : 'C';
+    });
+
+    (kisiler as any[]).filter((k) => k.toplamCiro === 0).forEach((k) => {
+      k.segment = 'C';
+    });
+
+    (kisiler as any[]).forEach((k) => delete k.toplamCiro);
 
     return NextResponse.json({ basarili: true, veri: kisiler }, { status: 200 });
   } catch (hata) {
     console.error('Kişiler getirilirken hata oluştu:', hata);
     return NextResponse.json(
       { basarili: false, mesaj: 'Sunucu hatası, kişiler getirilemedi.' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -83,18 +93,42 @@ export async function POST(istek: NextRequest) {
           mesaj: 'Veriler geçersiz.',
           hatalar: dogrulamaSonucu.error.format(),
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const { sirketAdi, sirketTipi, sehir, ilce, ...kisiVerisi } = dogrulamaSonucu.data;
+    const { sirketAdi, sirketTipi, sehir, ilce, forceNewCompany = false, ...kisiVerisi } =
+      dogrulamaSonucu.data;
 
     // Aynı isimli kurum varsa bağla, yoksa oluştur
     const bolge = ildenBolgeGetir(sehir);
+    const temizIsim = sirketAdi.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const nameRegex = new RegExp(`^${temizIsim}$`, 'i');
+    const benzerKurumlar = await CompanyModel.find({ name: { $regex: nameRegex } });
 
-    let kurum = await CompanyModel.findOne({
-      name: { $regex: new RegExp(`^${sirketAdi.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
-    });
+    const ayniSehirdeKurum = benzerKurumlar.find(
+      (k) => k.city?.toLowerCase().trim() === sehir.toLowerCase().trim(),
+    );
+
+    let kurum = ayniSehirdeKurum;
+
+    // Aynı isim farklı şehirdeyse, önce onay iste
+    if (!kurum && benzerKurumlar.length > 0 && !forceNewCompany) {
+      return NextResponse.json(
+        {
+          basarili: false,
+          mesaj:
+            'Bu isimdeki kurum farklı bir şehirde zaten kayıtlı. Yeni kurum olarak oluşturmak ister misiniz?',
+          kod: 'DUPLICATE_COMPANY_DIFFERENT_CITY',
+          mevcutKayitlar: benzerKurumlar.map((k) => ({
+            id: k._id,
+            city: k.city,
+            district: k.district,
+          })),
+        },
+        { status: 409 },
+      );
+    }
 
     if (!kurum) {
       kurum = await CompanyModel.create({
@@ -114,13 +148,13 @@ export async function POST(istek: NextRequest) {
 
     return NextResponse.json(
       { basarili: true, mesaj: 'Kişi başarıyla kaydedildi.', veri: yeniKisi },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (hata) {
     console.error('Kişi eklenirken hata oluştu:', hata);
     return NextResponse.json(
       { basarili: false, mesaj: 'Sunucu hatası, kişi kaydedilemedi.' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
