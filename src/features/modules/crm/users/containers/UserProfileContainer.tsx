@@ -2,13 +2,12 @@
 
 import React from "react";
 import { useKullaniciProfiliGetir } from "../service/queries/useUserProfileQueries";
-import { BolgeRenkleri, Bolgeler } from "@/core/constants/regions";
+import { Bolgeler, BolgeTemalari } from "@/core/constants/regions";
 import {
   MapPin,
   Phone,
   Mail,
   Award,
-  TrendingUp,
   Calendar,
   Package,
 } from "lucide-react";
@@ -16,6 +15,13 @@ import {
 interface IProps {
   userId: string;
 }
+
+// Segment etiketi
+const SEGMENT_ETIKET: Record<string, { label: string; bg: string; text: string }> = {
+  A: { label: "A Sınıfı — VIP", bg: "bg-yellow-400", text: "text-yellow-900" },
+  B: { label: "B Sınıfı — Düzenli", bg: "bg-blue-400", text: "text-blue-900" },
+  C: { label: "C Sınıfı — Potansiyel", bg: "bg-slate-300", text: "text-slate-700" },
+};
 
 export const UserProfileContainer: React.FC<IProps> = ({ userId }) => {
   const { data: profil, isLoading } = useKullaniciProfiliGetir(userId);
@@ -33,54 +39,60 @@ export const UserProfileContainer: React.FC<IProps> = ({ userId }) => {
 
   const { doktor, analiz, gecmisZiyaretler } = profil;
   const kurum = doktor.companyId || {};
-
-  // Bölge rengini belirle (Eğer kurumun bölgesi yoksa varsayılan olarak Marmara veya Gri bir ton alabiliriz)
   const bolge = (kurum as { region?: Bolgeler }).region;
-  const renkPaleti =
-    bolge && BolgeRenkleri[bolge]
-      ? BolgeRenkleri[bolge]
-      : { anaRenk: "#475569", vurguRengi: "#94A3B8" };
+
+  // Bölgeye özgü tema
+  const tema =
+    bolge && BolgeTemalari[bolge]
+      ? BolgeTemalari[bolge]
+      : { gradient: "from-slate-700 via-slate-600 to-slate-500", desen: "🏥", slogan: "Türkiye Geneli" };
+
+  // Segment bilgisi (profil API'sinden veya basit label)
+  const segmentBilgisi = SEGMENT_ETIKET[analiz.segment?.charAt(0) || "C"] || SEGMENT_ETIKET["C"];
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      {/* 1. KART: Müşteri Kimliği ve Bölge Teması */}
-      <div
-        className="relative overflow-hidden rounded-2xl shadow-lg text-white p-8"
-        style={{ backgroundColor: renkPaleti.anaRenk }}
-      >
-        {/* Dekoratif Arka Plan Çemberi */}
-        <div
-          className="absolute -right-20 -top-20 w-64 h-64 rounded-full opacity-20"
-          style={{ backgroundColor: renkPaleti.vurguRengi }}
-        ></div>
+    <div className="w-full space-y-6">
+      {/* 1. KART: Bölge Temalı Hero Banner */}
+      <div className={`relative overflow-hidden rounded-2xl shadow-xl text-white p-8 bg-linear-to-br ${tema.gradient}`}>
 
-        {/* SAĞ ÜST İL BİLGİSİ */}
-        <div className="absolute top-6 right-6 flex flex-col items-end">
+        {/* Dekoratif arka plan desen */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <span className="absolute -right-8 -top-8 text-9xl opacity-10 select-none">
+            {tema.desen}
+          </span>
+          <span className="absolute -left-4 -bottom-8 text-8xl opacity-10 select-none rotate-12">
+            {tema.desen}
+          </span>
+          <div className="absolute right-0 top-0 w-64 h-64 rounded-full bg-white/5 -translate-y-1/3 translate-x-1/3" />
+          <div className="absolute left-0 bottom-0 w-48 h-48 rounded-full bg-black/10 translate-y-1/3 -translate-x-1/3" />
+        </div>
+
+        {/* SAĞ ÜST: İl + Bölge */}
+        <div className="absolute top-6 right-6 flex flex-col items-end gap-2">
           <div className="flex items-center gap-1 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-semibold tracking-wider">
             <MapPin className="w-4 h-4" />
-            {(kurum as { city?: string }).city?.toUpperCase() ||
-              "İL BİLİNMİYOR"}
+            {(kurum as { city?: string }).city?.toUpperCase() || "İL BİLİNMİYOR"}
           </div>
           {bolge && (
-            <span className="text-xs mt-2 opacity-80 font-medium">
-              {bolge} Bölgesi
+            <span className="text-xs bg-white/15 px-3 py-1 rounded-full font-medium">
+              {tema.slogan}
             </span>
           )}
         </div>
 
+        {/* ANA İÇERİK */}
         <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center gap-3 mb-3">
             <span className="bg-white/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest">
               {doktor.title}
             </span>
-            {/* VIP / SEGMENT BİLGİSİ */}
-            <span className="flex items-center gap-1 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-xs font-bold shadow-sm">
+            <span className={`flex items-center gap-1 ${segmentBilgisi.bg} ${segmentBilgisi.text} px-3 py-1 rounded-full text-xs font-bold shadow-sm`}>
               <Award className="w-4 h-4" />
-              {analiz.segment}
+              {segmentBilgisi.label}
             </span>
           </div>
 
-          <h1 className="text-4xl font-extrabold tracking-tight mb-2">
+          <h1 className="text-4xl font-extrabold tracking-tight mb-2 drop-shadow">
             {doktor.firstName} {doktor.lastName}
           </h1>
           <p className="text-lg opacity-90 mb-6 flex items-center gap-2">
@@ -92,12 +104,12 @@ export const UserProfileContainer: React.FC<IProps> = ({ userId }) => {
 
           <div className="flex gap-6 text-sm font-medium">
             {doktor.phone && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 bg-white/15 px-3 py-1.5 rounded-full">
                 <Phone className="w-4 h-4" /> {doktor.phone}
               </div>
             )}
             {doktor.email && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 bg-white/15 px-3 py-1.5 rounded-full">
                 <Mail className="w-4 h-4" /> {doktor.email}
               </div>
             )}

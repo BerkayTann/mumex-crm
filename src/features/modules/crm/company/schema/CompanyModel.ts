@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import { ICompany, CompanyType } from '../types';
+import { Bolgeler } from '@/core/constants/regions';
 
 // Mongoose'un kendi Document tipi ile kendi ICompany tipimizi birleştiriyoruz
 export interface ICompanyDocument extends Omit<ICompany, '_id'>, Document {}
@@ -8,12 +9,14 @@ export interface ICompanyDocument extends Omit<ICompany, '_id'>, Document {}
 const sirketVeritabaniSemasi = new Schema<ICompanyDocument>(
   {
     name: { type: String, required: true },
-    type: { 
-      type: String, 
-      enum: Object.values(CompanyType), 
-      required: true 
+    type: {
+      type: String,
+      enum: Object.values(CompanyType),
+      required: true,
     },
     city: { type: String, required: true },
+    district: { type: String },
+    region: { type: String, enum: Object.values(Bolgeler) },
     address: { type: String },
     phone: { type: String },
     isActive: { type: Boolean, default: true },

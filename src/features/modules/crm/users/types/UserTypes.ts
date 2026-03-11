@@ -6,18 +6,22 @@ export enum UserTitle {
   MANAGER = 'MANAGER', // Klinik veya hastane yöneticisi
 }
 
+// Müşteri segmentasyonu (ciro bazlı dinamik)
+export type KisiSegmenti = 'A' | 'B' | 'C';
+
 // Temel Kişi (User) objemizin Frontend ve Backend arasındaki arayüzü
 export interface IUser {
   _id: string;
   firstName: string;
   lastName: string;
   title: UserTitle;
-  specialty?: string; // Uzmanlık alanı (Örn: Kardiyoloji, Dahiliye)
+  specialty?: string;
   phone?: string;
   email?: string;
   address?: string;
-  companyId: string; // KRİTİK ALAN: Bu kişinin çalıştığı Kurumun (Company) ID'si
+  companyId: string; // Populate edildiğinde ICompany objesi olur
   isActive: boolean;
+  segment?: KisiSegmenti; // Aggregation ile hesaplanan A/B/C sınıfı
   createdAt: Date;
   updatedAt: Date;
 }

@@ -7,63 +7,43 @@ import {
   useKisiSil,
   useKisiGuncelle,
 } from "../service";
-import { useSirketleriGetir } from "../../company"; // Barrel export üzerinden (GEMINI.md kuralı)
 import { UserList, UserForm } from "../components";
 import { IKisiFormVerisi } from "../schema/UserSchema";
 import { IUser } from "../types";
 import { ConfirmModal } from "@/components/common/ConfirmModal";
 
-//Kullanıcı Listesi Container
 export const UserListContainer = () => {
-  const [formAcikMi, setFormAcikMi] = useState(false); //Formun açık olup olmadığını tutan state
-  const [duzenlenecekKisi, setDuzenlenecekKisi] = useState<IUser | null>(null); //Düzenlenecek kişinin bilgisini tutan state
-  const [silinecekKisiId, setSilinecekKisiId] = useState<string | null>(null); //Silinecek kişinin ID'sini tutan state
+  const [formAcikMi, setFormAcikMi] = useState(false);
+  const [duzenlenecekKisi, setDuzenlenecekKisi] = useState<IUser | null>(null);
+  const [silinecekKisiId, setSilinecekKisiId] = useState<string | null>(null);
 
-  // 1. Verileri Çekiyoruz
   const { data: kisiler, isLoading: kisilerYukleniyor } = useKisileriGetir();
-  const { data: sirketler, isLoading: sirketlerYukleniyor } =
-    useSirketleriGetir();
 
-  // 2. Mutasyonlar
-  const { mutateAsync: kisiEkleMutasyonu, isPending: eklemeSuruyor } =
-    useKisiEkle();
-  const { mutateAsync: kisiSilMutasyonu, isPending: silmeSuruyor } =
-    useKisiSil();
-  const { mutateAsync: kisiGuncelleMutasyonu, isPending: guncellemeSuruyor } =
-    useKisiGuncelle();
+  const { mutateAsync: kisiEkleMutasyonu, isPending: eklemeSuruyor } = useKisiEkle();
+  const { mutateAsync: kisiSilMutasyonu, isPending: silmeSuruyor } = useKisiSil();
+  const { mutateAsync: kisiGuncelleMutasyonu, isPending: guncellemeSuruyor } = useKisiGuncelle();
 
-  //Formu kaydetme fonksiyonu (Hem Ekleme Hem Güncelleme)
   const onKisiKaydet = async (veri: IKisiFormVerisi) => {
     try {
       if (duzenlenecekKisi) {
-        // GÜNCELLEME
-        await kisiGuncelleMutasyonu({
-          id: duzenlenecekKisi._id,
-          guncelVeri: veri,
-        });
+        await kisiGuncelleMutasyonu({ id: duzenlenecekKisi._id, guncelVeri: veri });
       } else {
-        // YENİ KAYIT
         await kisiEkleMutasyonu(veri);
       }
       setFormAcikMi(false);
       setDuzenlenecekKisi(null);
-    } catch (hata) {
+    } catch {
       alert("İşlem sırasında bir hata oluştu.");
     }
   };
 
-  //Düzenleme modunu açan fonksiyon
   const onKisiDuzenle = (kisi: IUser) => {
     setDuzenlenecekKisi(kisi);
     setFormAcikMi(true);
   };
 
-  //Silme modunu açan fonksiyon
-  const onKisiSil = (id: string) => {
-    setSilinecekKisiId(id);
-  };
+  const onKisiSil = (id: string) => setSilinecekKisiId(id);
 
-  // Silme işlemini onaylayan (api'ye gönderen) fonksiyon
   const onSilmeOnayla = async () => {
     if (!silinecekKisiId) return;
     try {
@@ -74,12 +54,11 @@ export const UserListContainer = () => {
     }
   };
 
-  if (kisilerYukleniyor || sirketlerYukleniyor)
+  if (kisilerYukleniyor)
     return <div className="p-10 text-center">Veriler hazırlanıyor...</div>;
 
   return (
-    <div className="max-w-7xl mx-auto">
-      {/* SİLME ONAY MODALI */}
+    <div className="w-full">
       <ConfirmModal
         acikMi={!!silinecekKisiId}
         baslik="Kişiyi Sil"
@@ -92,7 +71,6 @@ export const UserListContainer = () => {
       {formAcikMi ? (
         <div className="p-6 max-w-2xl mx-auto">
           <UserForm
-            sirketler={sirketler || []}
             onFormuGonder={onKisiKaydet}
             onIptalEt={() => {
               setFormAcikMi(false);
