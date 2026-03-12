@@ -1,7 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { useZiyaretleriGetir, useZiyaretEkle, useZiyaretSil, useZiyaretGuncelle } from "../service";
+import {
+  useZiyaretleriGetir,
+  useZiyaretEkle,
+  useZiyaretSil,
+  useZiyaretGuncelle,
+} from "../service";
 import { useSirketleriGetir } from "../../company/service";
 import { useKisileriGetir } from "../../users/service";
 import { useUrunleriGetir } from "../../product/service";
@@ -12,8 +17,12 @@ import { ConfirmModal } from "@/components/common/ConfirmModal";
 
 export const VisitListContainer = () => {
   const [formAcikMi, setFormAcikMi] = useState(false);
-  const [duzenlenecekZiyaret, setDuzenlenecekZiyaret] = useState<IVisit | null>(null);
-  const [silinecekZiyaretId, setSilinecekZiyaretId] = useState<string | null>(null);
+  const [duzenlenecekZiyaret, setDuzenlenecekZiyaret] = useState<IVisit | null>(
+    null,
+  );
+  const [silinecekZiyaretId, setSilinecekZiyaretId] = useState<string | null>(
+    null,
+  );
 
   const { data: ziyaretler, isLoading: zYukleniyor } = useZiyaretleriGetir();
   const { data: sirketler, isLoading: sYukleniyor } = useSirketleriGetir();
@@ -21,7 +30,8 @@ export const VisitListContainer = () => {
   const { data: urunler, isLoading: uYukleniyor } = useUrunleriGetir();
 
   const { mutateAsync: ziyaretEkle, isPending: ekleniyor } = useZiyaretEkle();
-  const { mutateAsync: ziyaretGuncelle, isPending: guncelleniyor } = useZiyaretGuncelle();
+  const { mutateAsync: ziyaretGuncelle, isPending: guncelleniyor } =
+    useZiyaretGuncelle();
   const { mutateAsync: ziyaretSil, isPending: siliniyor } = useZiyaretSil();
 
   const onZiyaretKaydet = async (veri: IVisitFormVerisi) => {
@@ -59,7 +69,8 @@ export const VisitListContainer = () => {
     setDuzenlenecekZiyaret(null);
   };
 
-  const sayfaYukleniyor = zYukleniyor || sYukleniyor || kYukleniyor || uYukleniyor;
+  const sayfaYukleniyor =
+    zYukleniyor || sYukleniyor || kYukleniyor || uYukleniyor;
 
   if (sayfaYukleniyor) {
     return (
@@ -70,7 +81,7 @@ export const VisitListContainer = () => {
   }
 
   return (
-    <div className="w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="w-full px-4 sm:px-6 lg:px-8">
       {formAcikMi ? (
         <div className="p-4 sm:p-6 max-w-4xl mx-auto mt-4">
           <VisitForm

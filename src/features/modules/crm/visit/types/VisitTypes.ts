@@ -16,6 +16,7 @@ export interface IVisitProduct {
   unitPriceInTRY?: number;    // Satış anındaki TRY karşılığı (Snapshot)
   currency?: string;          // Satış anındaki döviz cinsi, örn. "USD" (Snapshot)
   totalPrice: number;         // quantity * unitPriceInTRY — her zaman TRY (Satır toplamı)
+  unit?: string;              // Satılan ürünün birimi (Kutu, Adet, vs.)
 }
 
 // Ana Ziyaret Objemiz
@@ -26,6 +27,7 @@ export interface IVisit {
   visitDate: string; // Ziyaret tarihi
   status: VisitStatus;
   notes?: string;    // Mümessilin görüşme notları
+  cargoStatus?: string; // Bekliyor, Kargoda, Ulaştı
   products: IVisitProduct[]; // Satılan ürünler listesi
   totalAmount: number; // Ziyaretin KDV dahil Genel Toplam Cirosu
   createdAt: string;

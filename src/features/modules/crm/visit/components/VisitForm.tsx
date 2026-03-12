@@ -8,7 +8,6 @@ import { IUser } from "../../users/types";
 import { IProduct } from "../../product/types";
 import { Plus, Trash2 } from "lucide-react";
 import { useDovizKurlari, tryeVevir } from "@/core/hooks/useExchangeRates";
-import { dovizSembolGetir, DESTEKLENEN_KURLAR } from "@/core/constants/currencies";
 
 interface IVisitFormProps {
   sirketler: ICompany[];
@@ -31,7 +30,6 @@ export const VisitForm: React.FC<IVisitFormProps> = ({
 }) => {
   const duzenlemeModuMu = !!ilkVeriler;
   const { data: kurlar } = useDovizKurlari();
-  const [goruntuleDovizi, setGoruntuleDovizi] = useState("TRY");
 
   const {
     register,
@@ -57,6 +55,7 @@ export const VisitForm: React.FC<IVisitFormProps> = ({
             : new Date().toISOString().split("T")[0],
           status: ilkVeriler.status,
           notes: ilkVeriler.notes || "",
+          cargoStatus: ilkVeriler.cargoStatus || "",
           products: ilkVeriler.products.map((p) => ({
             productId:
               typeof p.productId === "object"
@@ -67,12 +66,14 @@ export const VisitForm: React.FC<IVisitFormProps> = ({
             unitPriceInTRY: p.unitPriceInTRY ?? p.unitPrice,
             currency: p.currency ?? "TRY",
             totalPrice: p.totalPrice,
+            unit: p.unit ?? "Adet",
           })),
           totalAmount: ilkVeriler.totalAmount,
         }
       : {
           visitDate: new Date().toISOString().split("T")[0],
           status: VisitStatus.COMPLETED,
+          cargoStatus: "",
           products: [],
           totalAmount: 0,
         },
@@ -104,7 +105,11 @@ export const VisitForm: React.FC<IVisitFormProps> = ({
       genelToplam += satirToplami;
       return { ...p, totalPrice: satirToplami };
     });
-    onFormuGonder({ ...data, products: islenmisUrunler, totalAmount: genelToplam });
+    onFormuGonder({
+      ...data,
+      products: islenmisUrunler,
+      totalAmount: genelToplam,
+    });
   };
 
   return (
@@ -134,7 +139,9 @@ export const VisitForm: React.FC<IVisitFormProps> = ({
             ))}
           </select>
           {errors.companyId && (
-            <p className="text-red-500 text-xs mt-1">{errors.companyId.message}</p>
+            <p className="text-red-500 text-xs mt-1">
+              {errors.companyId.message}
+            </p>
           )}
         </div>
 
@@ -171,14 +178,35 @@ export const VisitForm: React.FC<IVisitFormProps> = ({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Durum</label>
+          <label className="block text-sm font-medium text-slate-700 mb-1">
+            Durum
+          </label>
           <select
             {...register("status")}
             className="w-full p-2 border rounded-md text-slate-900"
           >
-            <option value={VisitStatus.COMPLETED}>Tamamlandı (Satış Yapıldı)</option>
-            <option value={VisitStatus.PLANNED}>Planlandı (Henüz Gidilmedi)</option>
+            <option value={VisitStatus.COMPLETED}>
+              Tamamlandı (Satış Yapıldı)
+            </option>
+            <option value={VisitStatus.PLANNED}>
+              Planlandı (Henüz Gidilmedi)
+            </option>
             <option value={VisitStatus.CANCELLED}>İptal Edildi</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">
+            Kargo Durumu
+          </label>
+          <select
+            {...register("cargoStatus")}
+            className="w-full p-2 border rounded-md text-slate-900"
+          >
+            <option value="">-- Kargo Yok / Belirtilmedi --</option>
+            <option value="Bekliyor">Bekliyor</option>
+            <option value="Kargoda">Kargoda</option>
+            <option value="Ulaştı">Ulaştı</option>
           </select>
         </div>
       </div>
@@ -190,7 +218,15 @@ export const VisitForm: React.FC<IVisitFormProps> = ({
           <button
             type="button"
             onClick={() =>
-              append({ productId: "", quantity: 1, unitPrice: 0, unitPriceInTRY: 0, currency: "TRY", totalPrice: 0 })
+              append({
+                productId: "",
+                quantity: 1,
+                unitPrice: 0,
+                unitPriceInTRY: 0,
+                currency: "TRY",
+                totalPrice: 0,
+                unit: "Adet",
+              })
             }
             className="flex items-center gap-1 text-sm bg-slate-800 text-white px-3 py-1.5 rounded"
           >
@@ -204,11 +240,18 @@ export const VisitForm: React.FC<IVisitFormProps> = ({
           </p>
         )}
 
+        {!kurlar && fields.length > 0 && (
+          <div className="mb-4 bg-yellow-50 text-yellow-800 p-3 rounded text-sm border border-yellow-200 font-medium">
+            ⚠ Güncel döviz şuanda alınamıyor, lütfen TL giriş yapınız.
+          </div>
+        )}
+
         <div className="space-y-3">
           {fields.map((field, index) => {
             const satirDoviz = izlenenUrunler?.[index]?.currency || "TRY";
             const satirBirimFiyat = izlenenUrunler?.[index]?.unitPrice || 0;
-            const satirBirimFiyatTRY = izlenenUrunler?.[index]?.unitPriceInTRY ?? satirBirimFiyat;
+            const satirBirimFiyatTRY =
+              izlenenUrunler?.[index]?.unitPriceInTRY ?? satirBirimFiyat;
             const satirAdet = izlenenUrunler?.[index]?.quantity || 0;
             const satirToplamTRY = satirAdet * satirBirimFiyatTRY;
 
@@ -219,20 +262,27 @@ export const VisitForm: React.FC<IVisitFormProps> = ({
               >
                 {/* Ürün Seçici */}
                 <div className="flex-1">
-                  <label className="block text-xs text-slate-600 mb-1">Ürün</label>
+                  <label className="block text-xs text-slate-600 mb-1">
+                    Ürün
+                  </label>
                   <select
                     {...register(`products.${index}.productId`)}
                     className="w-full p-2 text-sm border rounded text-slate-900"
                     onChange={(e) => {
                       register(`products.${index}.productId`).onChange(e);
-                      const secilenUrun = urunler.find((u) => u._id === e.target.value);
+                      const secilenUrun = urunler.find(
+                        (u) => u._id === e.target.value,
+                      );
                       if (secilenUrun) {
                         const doviz = secilenUrun.currency || "TRY";
                         const fiyatTRY =
                           doviz === "TRY"
                             ? secilenUrun.price
                             : (secilenUrun.priceInTRY ?? secilenUrun.price);
-                        setValue(`products.${index}.unitPrice`, secilenUrun.price);
+                        setValue(
+                          `products.${index}.unitPrice`,
+                          secilenUrun.price,
+                        );
                         setValue(`products.${index}.unitPriceInTRY`, fiyatTRY);
                         setValue(`products.${index}.currency`, doviz);
                       }
@@ -252,12 +302,34 @@ export const VisitForm: React.FC<IVisitFormProps> = ({
 
                 {/* Adet */}
                 <div className="w-20">
-                  <label className="block text-xs text-slate-600 mb-1">Adet</label>
+                  <label className="block text-xs text-slate-600 mb-1">
+                    Miktar
+                  </label>
                   <input
                     type="number"
-                    {...register(`products.${index}.quantity`, { valueAsNumber: true })}
+                    min="1"
+                    {...register(`products.${index}.quantity`, {
+                      valueAsNumber: true,
+                    })}
                     className="w-full p-2 text-sm border rounded text-slate-900"
                   />
+                </div>
+
+                {/* Birim */}
+                <div className="w-24">
+                  <label className="block text-xs text-slate-600 mb-1">
+                    Birim
+                  </label>
+                  <select
+                    {...register(`products.${index}.unit`)}
+                    className="w-full p-2 text-sm border rounded text-slate-900 bg-white"
+                  >
+                    <option value="Adet">Adet</option>
+                    <option value="Kutu">Kutu</option>
+                    <option value="Şişe">Şişe</option>
+                    <option value="Ampul">Ampul</option>
+                    <option value="Flakon">Flakon</option>
+                  </select>
                 </div>
 
                 {/* Birim Fiyat (orijinal döviz cinsinde) */}
@@ -276,10 +348,13 @@ export const VisitForm: React.FC<IVisitFormProps> = ({
                           if (satirDoviz !== "TRY" && kurlar) {
                             setValue(
                               `products.${index}.unitPriceInTRY`,
-                              tryeVevir(yeniFiyat, satirDoviz, kurlar)
+                              tryeVevir(yeniFiyat, satirDoviz, kurlar),
                             );
                           } else {
-                            setValue(`products.${index}.unitPriceInTRY`, yeniFiyat);
+                            setValue(
+                              `products.${index}.unitPriceInTRY`,
+                              yeniFiyat,
+                            );
                           }
                         },
                       })}
@@ -294,7 +369,11 @@ export const VisitForm: React.FC<IVisitFormProps> = ({
                   {/* TRY karşılığı */}
                   {satirDoviz !== "TRY" && satirBirimFiyatTRY > 0 && (
                     <p className="text-xs text-slate-400 mt-0.5">
-                      ≈ {satirBirimFiyatTRY.toLocaleString("tr-TR", { maximumFractionDigits: 2 })} ₺
+                      ≈{" "}
+                      {satirBirimFiyatTRY.toLocaleString("tr-TR", {
+                        maximumFractionDigits: 2,
+                      })}{" "}
+                      ₺
                     </p>
                   )}
                 </div>
@@ -305,11 +384,18 @@ export const VisitForm: React.FC<IVisitFormProps> = ({
                     <p className="text-xs text-slate-500">
                       {satirDoviz !== "TRY" && (
                         <span className="block text-slate-400">
-                          {(satirAdet * satirBirimFiyat).toLocaleString("tr-TR", { maximumFractionDigits: 2 })} {satirDoviz}
+                          {(satirAdet * satirBirimFiyat).toLocaleString(
+                            "tr-TR",
+                            { maximumFractionDigits: 2 },
+                          )}{" "}
+                          {satirDoviz}
                         </span>
                       )}
                       <span className="font-semibold text-emerald-700">
-                        {satirToplamTRY.toLocaleString("tr-TR", { maximumFractionDigits: 2 })} ₺
+                        {satirToplamTRY.toLocaleString("tr-TR", {
+                          maximumFractionDigits: 2,
+                        })}{" "}
+                        ₺
                       </span>
                     </p>
                   </div>
@@ -327,8 +413,16 @@ export const VisitForm: React.FC<IVisitFormProps> = ({
                 </div>
 
                 {/* Hidden fields */}
-                <input type="hidden" {...register(`products.${index}.unitPriceInTRY`, { valueAsNumber: true })} />
-                <input type="hidden" {...register(`products.${index}.currency`)} />
+                <input
+                  type="hidden"
+                  {...register(`products.${index}.unitPriceInTRY`, {
+                    valueAsNumber: true,
+                  })}
+                />
+                <input
+                  type="hidden"
+                  {...register(`products.${index}.currency`)}
+                />
               </div>
             );
           })}
@@ -340,9 +434,15 @@ export const VisitForm: React.FC<IVisitFormProps> = ({
             <p className="text-sm font-semibold text-slate-700">
               Tahmini Toplam:{" "}
               <span className="text-emerald-700 text-base">
-                {(izlenenUrunler || []).reduce((toplam, p) => {
-                  return toplam + (p?.quantity || 0) * (p?.unitPriceInTRY ?? p?.unitPrice ?? 0);
-                }, 0).toLocaleString("tr-TR", { maximumFractionDigits: 2 })}{" "}
+                {(izlenenUrunler || [])
+                  .reduce((toplam, p) => {
+                    return (
+                      toplam +
+                      (p?.quantity || 0) *
+                        (p?.unitPriceInTRY ?? p?.unitPrice ?? 0)
+                    );
+                  }, 0)
+                  .toLocaleString("tr-TR", { maximumFractionDigits: 2 })}{" "}
                 ₺
               </span>
             </p>
@@ -379,8 +479,8 @@ export const VisitForm: React.FC<IVisitFormProps> = ({
           {yukleniyorMu
             ? "Kaydediliyor..."
             : duzenlemeModuMu
-            ? "Değişiklikleri Kaydet"
-            : "Ziyareti & Satışı Kaydet"}
+              ? "Değişiklikleri Kaydet"
+              : "Ziyareti & Satışı Kaydet"}
         </button>
       </div>
     </form>

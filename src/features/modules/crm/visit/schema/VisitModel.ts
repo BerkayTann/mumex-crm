@@ -14,7 +14,9 @@ export interface IVisitDocument extends Omit<IVisit, '_id' | 'companyId' | 'user
     unitPriceInTRY?: number;
     currency?: string;
     totalPrice: number;
+    unit?: string;
   }[];
+  cargoStatus?: string;
 }
 
 // MongoDB için Alt-Döküman (Subdocument) Şeması
@@ -24,7 +26,8 @@ const visitProductDbSchema = new Schema({
   unitPrice: { type: Number, required: true, min: 0 },
   unitPriceInTRY: { type: Number, min: 0 },
   currency: { type: String, default: 'TRY' },
-  totalPrice: { type: Number, required: true, min: 0 }
+  totalPrice: { type: Number, required: true, min: 0 },
+  unit: { type: String, default: 'Adet' }
 });
 
 const ziyaretVeritabaniSemasi = new Schema<IVisitDocument>(
@@ -34,6 +37,7 @@ const ziyaretVeritabaniSemasi = new Schema<IVisitDocument>(
     visitDate: { type: Date, required: true },
     status: { type: String, enum: Object.values(VisitStatus), default: VisitStatus.COMPLETED },
     notes: { type: String },
+    cargoStatus: { type: String },
     products: [visitProductDbSchema],
     totalAmount: { type: Number, required: true, default: 0 },
   },

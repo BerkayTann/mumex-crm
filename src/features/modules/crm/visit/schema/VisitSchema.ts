@@ -8,7 +8,8 @@ export const visitProductSchema = z.object({
   unitPrice: z.number().min(0, "Fiyat 0'dan küçük olamaz."),
   unitPriceInTRY: z.number().min(0).optional(),
   currency: z.string().default('TRY'),
-  totalPrice: z.number().min(0)
+  totalPrice: z.number().min(0),
+  unit: z.string().optional()
 });
 
 // Sonra Ana Ziyaret formunun kurallarını belirliyoruz
@@ -18,6 +19,7 @@ export const ziyaretEklemeSemasi = z.object({
   visitDate: z.string().min(1, "Ziyaret tarihi zorunludur."),
   status: z.nativeEnum(VisitStatus).default(VisitStatus.COMPLETED),
   notes: z.string().optional(),
+  cargoStatus: z.string().optional(),
   
   // Ziyarette en az 1 ürün satılmış olmasını (veya görüşülmüş olmasını) isteyebiliriz
   // Şimdilik boş liste de geçebilsin diye empty array'e izin veriyoruz

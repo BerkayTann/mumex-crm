@@ -14,15 +14,25 @@ import { ConfirmModal } from "@/components/common/ConfirmModal";
 
 export const ProductListContainer = () => {
   const [formAcikMi, setFormAcikMi] = useState(false);
-  const [duzenlenecekUrun, setDuzenlenecekUrun] = useState<IProduct | null>(null);
+  const [duzenlenecekUrun, setDuzenlenecekUrun] = useState<IProduct | null>(
+    null,
+  );
   const [silinecekUrunId, setSilinecekUrunId] = useState<string | null>(null);
 
-  const { data: urunler, isLoading: listeYukleniyor, isError: hataMevcut } = useUrunleriGetir();
+  const {
+    data: urunler,
+    isLoading: listeYukleniyor,
+    isError: hataMevcut,
+  } = useUrunleriGetir();
 
-  const { mutateAsync: urunEkleMutasyonu, isPending: eklemeIslemiSuruyor } = useUrunEkle();
-  const { mutateAsync: urunSilMutasyonu, isPending: silmeIslemiSuruyor } = useUrunSil();
-  const { mutateAsync: urunGuncelleMutasyonu, isPending: guncellemeIslemiSuruyor } =
-    useUrunGuncelle();
+  const { mutateAsync: urunEkleMutasyonu, isPending: eklemeIslemiSuruyor } =
+    useUrunEkle();
+  const { mutateAsync: urunSilMutasyonu, isPending: silmeIslemiSuruyor } =
+    useUrunSil();
+  const {
+    mutateAsync: urunGuncelleMutasyonu,
+    isPending: guncellemeIslemiSuruyor,
+  } = useUrunGuncelle();
 
   const onUrunKaydet = async (formVerisi: IUrunFormVerisi) => {
     try {
@@ -35,7 +45,10 @@ export const ProductListContainer = () => {
       };
 
       if (duzenlenecekUrun) {
-        await urunGuncelleMutasyonu({ id: duzenlenecekUrun._id, guncelVeri: payload });
+        await urunGuncelleMutasyonu({
+          id: duzenlenecekUrun._id,
+          guncelVeri: payload,
+        });
       } else {
         await urunEkleMutasyonu(payload);
       }
@@ -84,7 +97,7 @@ export const ProductListContainer = () => {
   }
 
   return (
-    <div className="w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="w-full px-4 sm:px-6 lg:px-8">
       <ConfirmModal
         acikMi={!!silinecekUrunId}
         baslik="Ürünü Sil"

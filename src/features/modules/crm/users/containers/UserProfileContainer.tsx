@@ -4,24 +4,24 @@ import React from "react";
 import { useKullaniciProfiliGetir } from "../service/queries/useUserProfileQueries";
 import { Bolgeler, BolgeTemalari } from "@/core/constants/regions";
 import { ildenBolgeGetir } from "@/core/constants/cities";
-import {
-  MapPin,
-  Phone,
-  Mail,
-  Award,
-  Calendar,
-  Package,
-} from "lucide-react";
+import { MapPin, Phone, Mail, Award, Calendar, Package } from "lucide-react";
 
 interface IProps {
   userId: string;
 }
 
 // Segment etiketi
-const SEGMENT_ETIKET: Record<string, { label: string; bg: string; text: string }> = {
+const SEGMENT_ETIKET: Record<
+  string,
+  { label: string; bg: string; text: string }
+> = {
   A: { label: "A Sınıfı — VIP", bg: "bg-yellow-400", text: "text-yellow-900" },
   B: { label: "B Sınıfı — Düzenli", bg: "bg-blue-400", text: "text-blue-900" },
-  C: { label: "C Sınıfı — Potansiyel", bg: "bg-slate-300", text: "text-slate-700" },
+  C: {
+    label: "C Sınıfı — Potansiyel",
+    bg: "bg-slate-300",
+    text: "text-slate-700",
+  },
 };
 
 export const UserProfileContainer: React.FC<IProps> = ({ userId }) => {
@@ -30,7 +30,7 @@ export const UserProfileContainer: React.FC<IProps> = ({ userId }) => {
   if (isLoading)
     return (
       <div className="p-10 text-center font-medium text-slate-500">
-        Müşteri İstihbarat Dosyası Yükleniyor...
+        profil yükleniyor
       </div>
     );
   if (!profil)
@@ -40,27 +40,39 @@ export const UserProfileContainer: React.FC<IProps> = ({ userId }) => {
 
   const { doktor, analiz, gecmisZiyaretler } = profil;
   const kurum = doktor.companyId || {};
-  const kurumTyped = kurum as { region?: Bolgeler; city?: string; name?: string };
+  const kurumTyped = kurum as {
+    region?: Bolgeler;
+    city?: string;
+    name?: string;
+  };
 
   // Bölge: önce DB'den al, yoksa şehir adından hesapla
   const bolge: Bolgeler | undefined =
     kurumTyped.region ||
-    (kurumTyped.city ? (ildenBolgeGetir(kurumTyped.city) as Bolgeler | undefined) : undefined);
+    (kurumTyped.city
+      ? (ildenBolgeGetir(kurumTyped.city) as Bolgeler | undefined)
+      : undefined);
 
   // Bölgeye özgü tema
   const tema =
     bolge && BolgeTemalari[bolge]
       ? BolgeTemalari[bolge]
-      : { gradient: "from-slate-700 via-slate-600 to-slate-500", desen: "🏥", slogan: "Türkiye Geneli" };
+      : {
+          gradient: "from-slate-700 via-slate-600 to-slate-500",
+          desen: "🏥",
+          slogan: "Türkiye Geneli",
+        };
 
   // Segment bilgisi
-  const segmentBilgisi = SEGMENT_ETIKET[analiz.segment?.charAt(0) || "C"] || SEGMENT_ETIKET["C"];
+  const segmentBilgisi =
+    SEGMENT_ETIKET[analiz.segment?.charAt(0) || "C"] || SEGMENT_ETIKET["C"];
 
   return (
     <div className="w-full space-y-6">
       {/* 1. KART: Bölge Temalı Hero Banner */}
-      <div className={`relative overflow-hidden rounded-2xl shadow-xl text-white p-6 sm:p-8 bg-linear-to-br ${tema.gradient}`}>
-
+      <div
+        className={`relative overflow-hidden rounded-2xl shadow-xl text-white p-6 sm:p-8 bg-linear-to-br ${tema.gradient}`}
+      >
         {/* Dekoratif arka plan desen */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <span className="absolute -right-8 -top-8 text-9xl opacity-10 select-none">
@@ -81,7 +93,9 @@ export const UserProfileContainer: React.FC<IProps> = ({ userId }) => {
               <span className="bg-white/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest">
                 {doktor.title}
               </span>
-              <span className={`flex items-center gap-1 ${segmentBilgisi.bg} ${segmentBilgisi.text} px-3 py-1 rounded-full text-xs font-bold shadow-sm`}>
+              <span
+                className={`flex items-center gap-1 ${segmentBilgisi.bg} ${segmentBilgisi.text} px-3 py-1 rounded-full text-xs font-bold shadow-sm`}
+              >
                 <Award className="w-4 h-4" />
                 {segmentBilgisi.label}
               </span>
