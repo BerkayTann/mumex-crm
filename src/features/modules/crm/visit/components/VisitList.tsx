@@ -8,11 +8,11 @@ import {
   Trash2,
   Search,
   Filter,
-  Info,
   X,
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
+  FileDown,
 } from "lucide-react";
 import { ICompany } from "../../company/types";
 import { IUser } from "../../users/types";
@@ -25,6 +25,7 @@ interface IVisitListProps {
   onYeniZiyaretEkleTiklandi: () => void;
   onDuzenleTiklandi: (ziyaret: IVisit) => void;
   onSilTiklandi: (id: string) => void;
+  onRaporlaTiklandi: () => void;
 }
 
 export const VisitList: React.FC<IVisitListProps> = ({
@@ -32,6 +33,7 @@ export const VisitList: React.FC<IVisitListProps> = ({
   onYeniZiyaretEkleTiklandi,
   onDuzenleTiklandi,
   onSilTiklandi,
+  onRaporlaTiklandi,
 }) => {
   const [aramaMetni, setAramaMetni] = useState("");
   const [durumFiltresi, setDurumFiltresi] = useState<string>("TUMU");
@@ -135,13 +137,22 @@ export const VisitList: React.FC<IVisitListProps> = ({
           <MapPin className="w-6 h-6 text-purple-600" />
           Ziyaretler ve Satışlar
         </h1>
-        <button
-          onClick={onYeniZiyaretEkleTiklandi}
-          className="inline-flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md transition-colors shadow-sm w-full sm:w-auto"
-        >
-          <PlusCircle className="w-5 h-5" />
-          Yeni Ziyaret / Satış Gir
-        </button>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <button
+            onClick={onYeniZiyaretEkleTiklandi}
+            className="inline-flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-md transition-colors shadow-sm flex-1 sm:flex-none"
+          >
+            <PlusCircle className="w-5 h-5" />
+            Yeni Ziyaret / Satış Gir
+          </button>
+          <button
+            onClick={onRaporlaTiklandi}
+            className="inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-md transition-colors shadow-sm flex-1 sm:flex-none"
+          >
+            <FileDown className="w-5 h-5" />
+            Raporla
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-col md:flex-row gap-3 bg-white p-3 sm:p-4 rounded-xl border border-slate-100 shadow-sm">
@@ -212,12 +223,6 @@ export const VisitList: React.FC<IVisitListProps> = ({
               <th className="px-4 sm:px-5 py-3 text-sm font-semibold text-slate-600 text-center">
                 Ürün Miktarı
               </th>
-              <th className="px-4 sm:px-5 py-3 text-sm font-semibold text-slate-600 text-center">
-                Birim
-              </th>
-              <th className="px-4 sm:px-5 py-3 text-sm font-semibold text-slate-600 text-right">
-                Satış Birim Fiyatı
-              </th>
               <th
                 className="px-4 sm:px-5 py-3 text-sm font-semibold text-slate-600 text-right cursor-pointer hover:bg-slate-100 transition-colors select-none group"
                 onClick={() => siralamaDegistir("totalAmount")}
@@ -233,7 +238,8 @@ export const VisitList: React.FC<IVisitListProps> = ({
             {filtrelenmisZiyaretler.map((ziyaret) => (
               <tr
                 key={ziyaret._id}
-                className="hover:bg-slate-50 transition-colors"
+                className="hover:bg-slate-50 transition-colors cursor-pointer"
+                onClick={() => setDetayModalZiyaret(ziyaret)}
               >
                 <td className="px-4 sm:px-5 py-3 whitespace-nowrap">
                   <div className="flex items-center gap-2 text-slate-700">
@@ -301,42 +307,6 @@ export const VisitList: React.FC<IVisitListProps> = ({
                     )}
                   </div>
                 </td>
-                <td className="px-4 sm:px-5 py-3 text-center">
-                  <div className="flex flex-col gap-1">
-                    {ziyaret.products.length > 0 ? (
-                      ziyaret.products.map((p, idx) => (
-                        <span
-                          key={idx}
-                          className="block text-sm text-slate-600"
-                        >
-                          {p.unit || "Adet"}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-slate-400 text-sm">-</span>
-                    )}
-                  </div>
-                </td>
-                <td className="px-4 sm:px-5 py-3 text-right">
-                  <div className="flex flex-col gap-1">
-                    {ziyaret.products.length > 0 ? (
-                      ziyaret.products.map((p, idx) => (
-                        <span
-                          key={idx}
-                          className="block text-sm font-medium text-emerald-600"
-                        >
-                          {(p.unitPriceInTRY ?? p.unitPrice).toLocaleString(
-                            "tr-TR",
-                            { maximumFractionDigits: 2 },
-                          )}{" "}
-                          ₺
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-slate-400 text-sm">-</span>
-                    )}
-                  </div>
-                </td>
                 <td className="px-4 sm:px-5 py-3 text-right">
                   <div className="font-bold text-emerald-700">
                     {ziyaret.totalAmount.toLocaleString("tr-TR", {
@@ -348,21 +318,14 @@ export const VisitList: React.FC<IVisitListProps> = ({
                 <td className="px-4 sm:px-5 py-3 text-right">
                   <div className="flex justify-end gap-2">
                     <button
-                      onClick={() => setDetayModalZiyaret(ziyaret)}
-                      className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                      title="Detay Meta Verileri"
-                    >
-                      <Info className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => onDuzenleTiklandi(ziyaret)}
+                      onClick={(e) => { e.stopPropagation(); onDuzenleTiklandi(ziyaret); }}
                       className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
                       title="Düzenle"
                     >
                       <Pencil className="w-4 h-4" />
                     </button>
                     <button
-                      onClick={() => onSilTiklandi(ziyaret._id)}
+                      onClick={(e) => { e.stopPropagation(); onSilTiklandi(ziyaret._id); }}
                       className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition-colors"
                       title="Sil"
                     >
@@ -416,6 +379,39 @@ export const VisitList: React.FC<IVisitListProps> = ({
                     {(detayModalZiyaret.userId as unknown as IUser)?.lastName}
                   </span>
                 </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                {detayModalZiyaret.plannedDate && (
+                  <div className="col-span-1">
+                    <span className="block text-slate-500 text-xs mb-1">
+                      Planlanan Tarih
+                    </span>
+                    <span className="font-semibold text-slate-800">
+                      {new Date(detayModalZiyaret.plannedDate).toLocaleDateString("tr-TR")}
+                    </span>
+                  </div>
+                )}
+                {detayModalZiyaret.cargoDate && (
+                  <div className="col-span-1">
+                    <span className="block text-slate-500 text-xs mb-1">
+                      Kargo Tarihi
+                    </span>
+                    <span className="font-semibold text-slate-800">
+                      {new Date(detayModalZiyaret.cargoDate).toLocaleDateString("tr-TR")}
+                    </span>
+                  </div>
+                )}
+                {detayModalZiyaret.deliveryDate && (
+                  <div className="col-span-1">
+                    <span className="block text-slate-500 text-xs mb-1">
+                      Teslim Tarihi
+                    </span>
+                    <span className="font-semibold text-slate-800">
+                      {new Date(detayModalZiyaret.deliveryDate).toLocaleDateString("tr-TR")}
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div>

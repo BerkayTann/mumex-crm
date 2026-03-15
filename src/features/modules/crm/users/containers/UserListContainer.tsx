@@ -38,7 +38,10 @@ export const UserListContainer = () => {
       setDuzenlenecekKisi(null);
     } catch (hata: any) {
       const kod = hata?.response?.data?.kod;
-      if (kod === "DUPLICATE_COMPANY_DIFFERENT_CITY" && !veri.forceNewCompany) {
+      if (
+        (kod === "DUPLICATE_COMPANY_DIFFERENT_CITY" || kod === "DUPLICATE_COMPANY_DIFFERENT_ADDRESS") &&
+        !veri.forceNewCompany
+      ) {
         setBekleyenVeri(veri);
         setDuplikasyonUyarisiAcik(true);
         return;
@@ -132,8 +135,8 @@ export const UserListContainer = () => {
 
       <ConfirmModal
         acikMi={duplikasyonUyarisiAcik}
-        baslik="Farklı Şehirde Yeni Şube"
-        mesaj={`"${bekleyenVeri?.sirketAdi}" adlı kurum farklı bir şehirde zaten kayıtlı. Seçilen şehir (${bekleyenVeri?.sehir}) için ayrı bir şube kaydı oluşturulacak. Mevcut hiçbir kayıt silinmeyecek. Onaylıyor musunuz?`}
+        baslik="Yeni Şube Kaydı"
+        mesaj={`"${bekleyenVeri?.sirketAdi}" adlı kurum farklı bir konumda zaten kayıtlı. Yeni bir şube kaydı oluşturulacak. Mevcut hiçbir kayıt silinmeyecek. Onaylıyor musunuz?`}
         onIptal={duplikasyonIptal}
         onOnayla={duplikasyonOnayla}
         yukleniyorMu={eklemeSuruyor || guncellemeSuruyor}
@@ -142,28 +145,30 @@ export const UserListContainer = () => {
         onayTipi="bilgi"
       />
 
-      {formAcikMi ? (
-        <div className="p-6 max-w-2xl mx-auto">
-          <UserForm
-            onFormuGonder={onKisiKaydet}
-            onIptalEt={() => {
-              setFormAcikMi(false);
-              setDuzenlenecekKisi(null);
-            }}
-            yukleniyorMu={eklemeSuruyor || guncellemeSuruyor}
-            ilkVeriler={duzenlenecekKisi || undefined}
-          />
+      <UserList
+        kisiler={kisiler || []}
+        onYeniKisiEkleTiklandi={() => {
+          setDuzenlenecekKisi(null);
+          setFormAcikMi(true);
+        }}
+        onDuzenleTiklandi={onKisiDuzenle}
+        onSilTiklandi={onKisiSil}
+      />
+
+      {formAcikMi && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <UserForm
+              onFormuGonder={onKisiKaydet}
+              onIptalEt={() => {
+                setFormAcikMi(false);
+                setDuzenlenecekKisi(null);
+              }}
+              yukleniyorMu={eklemeSuruyor || guncellemeSuruyor}
+              ilkVeriler={duzenlenecekKisi || undefined}
+            />
+          </div>
         </div>
-      ) : (
-        <UserList
-          kisiler={kisiler || []}
-          onYeniKisiEkleTiklandi={() => {
-            setDuzenlenecekKisi(null);
-            setFormAcikMi(true);
-          }}
-          onDuzenleTiklandi={onKisiDuzenle}
-          onSilTiklandi={onKisiSil}
-        />
       )}
     </div>
   );

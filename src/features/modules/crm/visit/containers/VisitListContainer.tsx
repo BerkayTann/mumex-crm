@@ -10,7 +10,7 @@ import {
 import { useSirketleriGetir } from "../../company/service";
 import { useKisileriGetir } from "../../users/service";
 import { useUrunleriGetir } from "../../product/service";
-import { VisitList, VisitForm } from "../components";
+import { VisitList, VisitForm, VisitReportModal } from "../components";
 import { IVisit } from "../types";
 import { IVisitFormVerisi } from "../schema/VisitSchema";
 import { ConfirmModal } from "@/components/common/ConfirmModal";
@@ -23,6 +23,7 @@ export const VisitListContainer = () => {
   const [silinecekZiyaretId, setSilinecekZiyaretId] = useState<string | null>(
     null,
   );
+  const [raporModalAcikMi, setRaporModalAcikMi] = useState(false);
 
   const { data: ziyaretler, isLoading: zYukleniyor } = useZiyaretleriGetir();
   const { data: sirketler, isLoading: sYukleniyor } = useSirketleriGetir();
@@ -82,26 +83,13 @@ export const VisitListContainer = () => {
 
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8">
-      {formAcikMi ? (
-        <div className="p-4 sm:p-6 max-w-4xl mx-auto mt-4">
-          <VisitForm
-            sirketler={sirketler || []}
-            kisiler={kisiler || []}
-            urunler={urunler || []}
-            onFormuGonder={onZiyaretKaydet}
-            onIptalEt={onFormIptal}
-            yukleniyorMu={ekleniyor || guncelleniyor}
-            ilkVeriler={duzenlenecekZiyaret || undefined}
-          />
-        </div>
-      ) : (
-        <VisitList
-          ziyaretler={ziyaretler || []}
-          onYeniZiyaretEkleTiklandi={() => setFormAcikMi(true)}
-          onDuzenleTiklandi={onDuzenleTiklandi}
-          onSilTiklandi={(id) => setSilinecekZiyaretId(id)}
-        />
-      )}
+      <VisitList
+        ziyaretler={ziyaretler || []}
+        onYeniZiyaretEkleTiklandi={() => setFormAcikMi(true)}
+        onDuzenleTiklandi={onDuzenleTiklandi}
+        onSilTiklandi={(id) => setSilinecekZiyaretId(id)}
+        onRaporlaTiklandi={() => setRaporModalAcikMi(true)}
+      />
 
       <ConfirmModal
         acikMi={!!silinecekZiyaretId}
@@ -110,6 +98,28 @@ export const VisitListContainer = () => {
         onOnayla={onSilOnaylandi}
         onIptal={() => setSilinecekZiyaretId(null)}
         yukleniyorMu={siliniyor}
+      />
+
+      {formAcikMi && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <VisitForm
+              sirketler={sirketler || []}
+              kisiler={kisiler || []}
+              urunler={urunler || []}
+              onFormuGonder={onZiyaretKaydet}
+              onIptalEt={onFormIptal}
+              yukleniyorMu={ekleniyor || guncelleniyor}
+              ilkVeriler={duzenlenecekZiyaret || undefined}
+            />
+          </div>
+        </div>
+      )}
+
+      <VisitReportModal
+        acikMi={raporModalAcikMi}
+        onKapat={() => setRaporModalAcikMi(false)}
+        ziyaretler={ziyaretler || []}
       />
     </div>
   );

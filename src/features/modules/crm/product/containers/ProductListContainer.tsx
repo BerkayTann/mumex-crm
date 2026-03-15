@@ -40,6 +40,8 @@ export const ProductListContainer = () => {
         name: formVerisi.name,
         category: formVerisi.category,
         price: formVerisi.price,
+        currency: formVerisi.currency,
+        priceInTRY: formVerisi.priceInTRY,
         description: formVerisi.description || "",
         isActive: formVerisi.isActive,
       };

@@ -208,7 +208,8 @@ export const ProductList: React.FC<IProductListProps> = ({
                 </td>
                 <td className="px-4 sm:px-5 py-3 text-right">
                   <div className="font-semibold text-emerald-600">
-                    {urun.price.toLocaleString("tr-TR")} {urun.currency || "₺"}
+                    {urun.price.toLocaleString("tr-TR")}{" "}
+                    {!urun.currency || urun.currency === "TRY" ? "₺" : urun.currency}
                   </div>
                   {urun.currency &&
                     urun.currency !== "TRY" &&

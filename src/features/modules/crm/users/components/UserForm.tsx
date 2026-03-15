@@ -47,6 +47,7 @@ export const UserForm: React.FC<IUserFormProps> = ({
       sirketTipi: kurum?.type || CompanyType.HOSPITAL,
       sehir: kurum?.city || "",
       ilce: kurum?.district || "",
+      sirketAdresi: (kurum as any)?.address || "",
       forceNewCompany: false,
     },
   });
@@ -75,6 +76,7 @@ export const UserForm: React.FC<IUserFormProps> = ({
         sirketTipi: kurum?.type || CompanyType.HOSPITAL,
         sehir: kurum?.city || "",
         ilce: kurum?.district || "",
+        sirketAdresi: (kurum as any)?.address || "",
         forceNewCompany: false,
       });
     }
@@ -198,6 +200,17 @@ export const UserForm: React.FC<IUserFormProps> = ({
             placeholder="Örn: Bornova"
           />
         </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-slate-700 mb-1">
+          Kurum Adresi <span className="text-slate-400">(opsiyonel - şube ayrımı için)</span>
+        </label>
+        <input
+          {...register("sirketAdresi")}
+          className="w-full p-2 border border-slate-300 rounded-md text-slate-900 placeholder:text-slate-400"
+          placeholder="Kurum açık adresi (aynı adresteki şubeleri ayırmak için)"
+        />
       </div>
 
       {/* İLETİŞİM VE ADRES */}

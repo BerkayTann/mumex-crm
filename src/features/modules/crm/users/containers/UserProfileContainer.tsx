@@ -111,6 +111,13 @@ export const UserProfileContainer: React.FC<IProps> = ({ userId }) => {
               </span>
             </p>
 
+            {doktor.address && (
+              <p className="text-sm opacity-80 mb-3 flex items-center gap-1.5">
+                <MapPin className="w-3.5 h-3.5 shrink-0" />
+                {doktor.address}
+              </p>
+            )}
+
             <div className="flex flex-wrap gap-3 text-sm font-medium">
               {doktor.phone && (
                 <div className="flex items-center gap-2 bg-white/15 px-3 py-1.5 rounded-full">

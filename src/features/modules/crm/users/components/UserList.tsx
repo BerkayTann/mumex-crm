@@ -215,6 +215,9 @@ export const UserList: React.FC<IUserListProps> = ({
                     Sınıf <SiralamaIkon kolon="sinif" />
                   </span>
                 </th>
+                <th className="px-6 py-4 text-sm font-semibold text-slate-600">
+                  Açık Adres
+                </th>
                 <th className="px-6 py-4 text-sm font-semibold text-slate-600 text-right">
                   İşlemler
                 </th>
@@ -282,6 +285,15 @@ export const UserList: React.FC<IUserListProps> = ({
                         </span>
                       ) : (
                         <span className="text-slate-400 text-xs">-</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-slate-500 max-w-[150px]">
+                      {kisi.address ? (
+                        <span className="block truncate" title={kisi.address}>
+                          {kisi.address}
+                        </span>
+                      ) : (
+                        <span className="text-slate-300">—</span>
                       )}
                     </td>
                     <td className="px-6 py-4 text-right">

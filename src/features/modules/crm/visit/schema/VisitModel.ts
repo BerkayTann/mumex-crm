@@ -3,10 +3,13 @@ import { IVisit, VisitStatus } from '../types';
 
 // Veritabanı seviyesinde kullanılacak döküman arayüzü
 // IVisit'ten gelen string tiplerini, Mongoose'un beklediği tiplerle eziyoruz (Override)
-export interface IVisitDocument extends Omit<IVisit, '_id' | 'companyId' | 'userId' | 'visitDate' | 'products' | 'createdAt' | 'updatedAt'>, Document {
+export interface IVisitDocument extends Omit<IVisit, '_id' | 'companyId' | 'userId' | 'visitDate' | 'products' | 'plannedDate' | 'cargoDate' | 'deliveryDate' | 'createdAt' | 'updatedAt'>, Document {
   companyId: mongoose.Types.ObjectId;
   userId: mongoose.Types.ObjectId;
   visitDate: Date;
+  plannedDate?: Date | null;
+  cargoDate?: Date | null;
+  deliveryDate?: Date | null;
   products: {
     productId: mongoose.Types.ObjectId;
     quantity: number;
@@ -38,6 +41,9 @@ const ziyaretVeritabaniSemasi = new Schema<IVisitDocument>(
     status: { type: String, enum: Object.values(VisitStatus), default: VisitStatus.COMPLETED },
     notes: { type: String },
     cargoStatus: { type: String },
+    plannedDate: { type: Date },
+    cargoDate: { type: Date },
+    deliveryDate: { type: Date },
     products: [visitProductDbSchema],
     totalAmount: { type: Number, required: true, default: 0 },
   },
@@ -46,4 +52,10 @@ const ziyaretVeritabaniSemasi = new Schema<IVisitDocument>(
   }
 );
 
-export const VisitModel = mongoose.models.Visit || mongoose.model<IVisitDocument>('Visit', ziyaretVeritabaniSemasi);
+// Next.js Hot Reloading sırasında model şemasının güncellenmesini garanti altına almak için:
+if (mongoose.models.Visit) {
+  delete mongoose.models.Visit;
+}
+
+export const VisitModel = mongoose.model<IVisitDocument>('Visit', ziyaretVeritabaniSemasi);
+

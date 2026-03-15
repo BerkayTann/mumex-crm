@@ -56,6 +56,15 @@ export const VisitForm: React.FC<IVisitFormProps> = ({
           status: ilkVeriler.status,
           notes: ilkVeriler.notes || "",
           cargoStatus: ilkVeriler.cargoStatus || "",
+          plannedDate: ilkVeriler.plannedDate
+            ? new Date(ilkVeriler.plannedDate).toISOString().split("T")[0]
+            : "",
+          cargoDate: ilkVeriler.cargoDate
+            ? new Date(ilkVeriler.cargoDate).toISOString().split("T")[0]
+            : "",
+          deliveryDate: ilkVeriler.deliveryDate
+            ? new Date(ilkVeriler.deliveryDate).toISOString().split("T")[0]
+            : "",
           products: ilkVeriler.products.map((p) => ({
             productId:
               typeof p.productId === "object"
@@ -74,6 +83,9 @@ export const VisitForm: React.FC<IVisitFormProps> = ({
           visitDate: new Date().toISOString().split("T")[0],
           status: VisitStatus.COMPLETED,
           cargoStatus: "",
+          plannedDate: "",
+          cargoDate: "",
+          deliveryDate: "",
           products: [],
           totalAmount: 0,
         },
@@ -85,6 +97,8 @@ export const VisitForm: React.FC<IVisitFormProps> = ({
   });
 
   const seciliSirketId = watch("companyId");
+  const izlenenDurum = watch("status");
+  const izlenenKargoDurumu = watch("cargoStatus");
   const izlenenUrunler = useWatch({ control, name: "products" });
 
   const filtrelenmisKisiler = useMemo(() => {
@@ -209,6 +223,60 @@ export const VisitForm: React.FC<IVisitFormProps> = ({
             <option value="Ulaştı">Ulaştı</option>
           </select>
         </div>
+
+        {izlenenDurum === VisitStatus.PLANNED && (
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Planlanan Tarih <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="date"
+              {...register("plannedDate")}
+              className="w-full p-2 border rounded-md text-slate-900"
+            />
+            {errors.plannedDate && (
+              <p className="text-red-500 text-xs mt-1">
+                {errors.plannedDate.message}
+              </p>
+            )}
+          </div>
+        )}
+
+        {izlenenKargoDurumu === "Kargoda" && (
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Kargo Tarihi <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="date"
+              {...register("cargoDate")}
+              className="w-full p-2 border rounded-md text-slate-900"
+            />
+            {errors.cargoDate && (
+              <p className="text-red-500 text-xs mt-1">
+                {errors.cargoDate.message}
+              </p>
+            )}
+          </div>
+        )}
+
+        {izlenenKargoDurumu === "Ulaştı" && (
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Teslim Tarihi <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="date"
+              {...register("deliveryDate")}
+              className="w-full p-2 border rounded-md text-slate-900"
+            />
+            {errors.deliveryDate && (
+              <p className="text-red-500 text-xs mt-1">
+                {errors.deliveryDate.message}
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* 2. ORTA KISIM: Dinamik Satış Listesi */}
@@ -278,7 +346,9 @@ export const VisitForm: React.FC<IVisitFormProps> = ({
                         const fiyatTRY =
                           doviz === "TRY"
                             ? secilenUrun.price
-                            : (secilenUrun.priceInTRY ?? secilenUrun.price);
+                            : kurlar
+                              ? tryeVevir(secilenUrun.price, doviz, kurlar)
+                              : (secilenUrun.priceInTRY ?? secilenUrun.price);
                         setValue(
                           `products.${index}.unitPrice`,
                           secilenUrun.price,

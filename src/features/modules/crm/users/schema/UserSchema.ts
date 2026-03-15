@@ -18,6 +18,7 @@ export const kisiEklemeSemasi = z.object({
   sirketTipi: z.nativeEnum(CompanyType, { message: "Geçerli bir kurum tipi seçiniz." }),
   sehir: z.string().min(2, { message: "Şehir alanı zorunludur." }),
   ilce: z.string().optional(),
+  sirketAdresi: z.string().optional().or(z.literal('')),
   forceNewCompany: z.boolean().optional().default(false),
 });
 

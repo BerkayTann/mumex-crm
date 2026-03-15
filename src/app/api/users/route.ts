@@ -97,7 +97,7 @@ export async function POST(istek: NextRequest) {
       );
     }
 
-    const { sirketAdi, sirketTipi, sehir, ilce, forceNewCompany = false, ...kisiVerisi } =
+    const { sirketAdi, sirketTipi, sehir, ilce, sirketAdresi, forceNewCompany = false, ...kisiVerisi } =
       dogrulamaSonucu.data;
 
     // Aynı isimli kurum varsa bağla, yoksa oluştur
@@ -106,24 +106,46 @@ export async function POST(istek: NextRequest) {
     const nameRegex = new RegExp(`^${temizIsim}$`, 'i');
     const benzerKurumlar = await CompanyModel.find({ name: { $regex: nameRegex } });
 
-    const ayniSehirdeKurum = benzerKurumlar.find(
-      (k) => k.city?.toLowerCase().trim() === sehir.toLowerCase().trim(),
-    );
+    let kurum = null;
+    let hataNedeni: 'DUPLICATE_COMPANY_DIFFERENT_CITY' | 'DUPLICATE_COMPANY_DIFFERENT_ADDRESS' | null = null;
 
-    let kurum = ayniSehirdeKurum;
+    if (sirketAdresi && sirketAdresi.trim()) {
+      // ADRES BAZLI EŞLEŞME
+      const ayniAdresteKurum = benzerKurumlar.find(
+        (k) => (k.address || '').toLowerCase().trim() === sirketAdresi.toLowerCase().trim(),
+      );
+      kurum = ayniAdresteKurum || null;
 
-    // Aynı isim farklı şehirdeyse, önce onay iste
-    if (!kurum && benzerKurumlar.length > 0 && !forceNewCompany) {
+      if (!kurum && benzerKurumlar.length > 0 && !forceNewCompany) {
+        hataNedeni = 'DUPLICATE_COMPANY_DIFFERENT_ADDRESS';
+      }
+    } else {
+      // ŞEHİR BAZLI EŞLEŞME (mevcut davranış)
+      const ayniSehirdeKurum = benzerKurumlar.find(
+        (k) => k.city?.toLowerCase().trim() === sehir.toLowerCase().trim(),
+      );
+      kurum = ayniSehirdeKurum || null;
+
+      if (!kurum && benzerKurumlar.length > 0 && !forceNewCompany) {
+        hataNedeni = 'DUPLICATE_COMPANY_DIFFERENT_CITY';
+      }
+    }
+
+    // Aynı isim farklı konumdaysa, önce onay iste
+    if (hataNedeni && !forceNewCompany) {
       return NextResponse.json(
         {
           basarili: false,
           mesaj:
-            'Bu isimdeki kurum farklı bir şehirde zaten kayıtlı. Yeni kurum olarak oluşturmak ister misiniz?',
-          kod: 'DUPLICATE_COMPANY_DIFFERENT_CITY',
+            hataNedeni === 'DUPLICATE_COMPANY_DIFFERENT_ADDRESS'
+              ? 'Bu isimdeki kurum farklı bir adreste zaten kayıtlı. Yeni kurum olarak oluşturmak ister misiniz?'
+              : 'Bu isimdeki kurum farklı bir şehirde zaten kayıtlı. Yeni kurum olarak oluşturmak ister misiniz?',
+          kod: hataNedeni,
           mevcutKayitlar: benzerKurumlar.map((k) => ({
             id: k._id,
             city: k.city,
             district: k.district,
+            address: k.address,
           })),
         },
         { status: 409 },
@@ -137,6 +159,7 @@ export async function POST(istek: NextRequest) {
         city: sehir,
         district: ilce || undefined,
         region: bolge || undefined,
+        address: sirketAdresi || undefined,
         isActive: true,
       });
     }

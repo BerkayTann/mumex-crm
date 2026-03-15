@@ -28,6 +28,9 @@ export interface IVisit {
   status: VisitStatus;
   notes?: string;    // Mümessilin görüşme notları
   cargoStatus?: string; // Bekliyor, Kargoda, Ulaştı
+  plannedDate?: string | null; // Durum PLANNED olduğunda, planlanan ziyaret tarihi
+  cargoDate?: string | null; // Kargo durumu "Kargoda" olduğunda, kargo gönderme tarihi
+  deliveryDate?: string | null; // Kargo durumu "Ulaştı" olduğunda, teslim tarihi
   products: IVisitProduct[]; // Satılan ürünler listesi
   totalAmount: number; // Ziyaretin KDV dahil Genel Toplam Cirosu
   createdAt: string;

@@ -6,6 +6,7 @@ import {
   useSirketGuncelle,
   useSirketSil,
 } from "../service";
+import { useKisileriGetir } from "../../users/service";
 import { CompanyList, CompanyForm } from "../components";
 import { type ISirketFormVerisi } from "../schema/CompanySchema";
 import { ICompany } from "../types";
@@ -17,6 +18,7 @@ export const CompanyListContainer = () => {
   const [silinecekSirketId, setSilinecekSirketId] = useState<string | null>(null);
 
   const { data: sirketler, isLoading: listeYukleniyor } = useSirketleriGetir();
+  const { data: kisiler, isLoading: kisilerYukleniyor } = useKisileriGetir();
   const { mutateAsync: sirketGuncelle, isPending: guncelleniyor } = useSirketGuncelle();
   const { mutateAsync: sirketSil, isPending: siliniyor } = useSirketSil();
 
@@ -51,7 +53,7 @@ export const CompanyListContainer = () => {
     }
   };
 
-  if (listeYukleniyor)
+  if (listeYukleniyor || kisilerYukleniyor)
     return <div className="p-10 text-center">Yükleniyor...</div>;
 
   return (
@@ -65,21 +67,24 @@ export const CompanyListContainer = () => {
         yukleniyorMu={siliniyor}
       />
 
-      {formAcikMi && seciliSirket ? (
-        <div className="p-6 max-w-2xl mx-auto mt-10">
-          <CompanyForm
-            seciliSirket={seciliSirket}
-            onFormuGonder={onSirketKaydet}
-            onIptalEt={formuKapat}
-            yukleniyorMu={guncelleniyor}
-          />
+      <CompanyList
+        sirketler={sirketler || []}
+        kisiler={kisiler || []}
+        onDuzenleTiklandi={formuAc}
+        onSilTiklandi={(id) => setSilinecekSirketId(id)}
+      />
+
+      {formAcikMi && seciliSirket && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <CompanyForm
+              seciliSirket={seciliSirket}
+              onFormuGonder={onSirketKaydet}
+              onIptalEt={formuKapat}
+              yukleniyorMu={guncelleniyor}
+            />
+          </div>
         </div>
-      ) : (
-        <CompanyList
-          sirketler={sirketler || []}
-          onDuzenleTiklandi={formuAc}
-          onSilTiklandi={(id) => setSilinecekSirketId(id)}
-        />
       )}
     </div>
   );

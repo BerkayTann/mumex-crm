@@ -20,12 +20,37 @@ export const ziyaretEklemeSemasi = z.object({
   status: z.nativeEnum(VisitStatus).default(VisitStatus.COMPLETED),
   notes: z.string().optional(),
   cargoStatus: z.string().optional(),
-  
+  plannedDate: z.string().optional().or(z.literal('')).transform(v => !v ? undefined : v),
+  cargoDate: z.string().optional().or(z.literal('')).transform(v => !v ? undefined : v),
+  deliveryDate: z.string().optional().or(z.literal('')).transform(v => !v ? undefined : v),
+
   // Ziyarette en az 1 ürün satılmış olmasını (veya görüşülmüş olmasını) isteyebiliriz
   // Şimdilik boş liste de geçebilsin diye empty array'e izin veriyoruz
   products: z.array(visitProductSchema).default([]),
-  
+
   totalAmount: z.number().min(0).default(0),
+}).superRefine((data, ctx) => {
+  if (data.status === VisitStatus.PLANNED && !data.plannedDate) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['plannedDate'],
+      message: 'Durum "Planlandı" seçildiğinde planlanan tarih zorunludur.',
+    });
+  }
+  if (data.cargoStatus === 'Kargoda' && !data.cargoDate) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['cargoDate'],
+      message: 'Kargo durumu "Kargoda" iken kargo tarihi zorunludur.',
+    });
+  }
+  if (data.cargoStatus === 'Ulaştı' && !data.deliveryDate) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['deliveryDate'],
+      message: 'Kargo durumu "Ulaştı" iken teslim tarihi zorunludur.',
+    });
+  }
 });
 
 export type IVisitFormVerisi = z.infer<typeof ziyaretEklemeSemasi>;
