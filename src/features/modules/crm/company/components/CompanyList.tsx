@@ -383,7 +383,7 @@ export const CompanyList: React.FC<ICompanyListProps> = ({
               {/* Kayıtlı Kişiler */}
               <div className="border-t pt-4">
                 <h4 className="text-sm font-semibold text-slate-700 mb-3">
-                  Bu Kuruma Kayıtlı Kişiler
+                  Bu Kuruma Kayıtlı Müşteriler
                 </h4>
                 <div className="space-y-2">
                   {kisiler

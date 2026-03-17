@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 
@@ -8,42 +8,22 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
   const [mobilAcik, setMobilAcik] = useState(false);
   const [daralmisMi, setDaralmisMi] = useState(false);
 
-  // Sayfa yüklenirken localStorage'dan tema uygula
-  useEffect(() => {
-    const tema = localStorage.getItem("mumex-tema") || "acik";
-    if (tema === "koyu") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, []);
-
   const onMenuToggle = () => {
-    setMobilAcik((v) => !v);   // mobile overlay aç/kapa
-    setDaralmisMi((v) => !v);  // desktop daralt/genişlet
+    setMobilAcik((v) => !v);
+    setDaralmisMi((v) => !v);
   };
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 dark:bg-slate-950 overflow-hidden">
-      {/* Mobil Backdrop */}
+    <div className="flex h-screen w-full overflow-hidden bg-background text-foreground">
       {mobilAcik && (
-        <div
-          className="fixed inset-0 z-30 bg-black/50 lg:hidden"
-          onClick={() => setMobilAcik(false)}
-        />
+        <div className="fixed inset-0 z-30 bg-black/50 lg:hidden" onClick={() => setMobilAcik(false)} />
       )}
 
-      {/* Sol Menü */}
-      <Sidebar
-        acikMi={mobilAcik}
-        daralmisMi={daralmisMi}
-        onKapat={() => setMobilAcik(false)}
-      />
+      <Sidebar acikMi={mobilAcik} daralmisMi={daralmisMi} onKapat={() => setMobilAcik(false)} />
 
-      {/* Sağ Taraf (İçerik Alanı) */}
-      <div className="flex flex-col flex-1 overflow-hidden min-w-0">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden bg-background">
         <Header onMenuAc={onMenuToggle} />
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6 dark:bg-slate-900">{children}</main>
+        <main className="flex-1 overflow-y-auto bg-background p-4 text-foreground lg:p-6">{children}</main>
       </div>
     </div>
   );

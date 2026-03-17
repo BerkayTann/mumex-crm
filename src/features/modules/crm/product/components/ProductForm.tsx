@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { urunEklemeSemasi, IUrunFormVerisi } from "../schema/ProductSchema";
+import { urunEklemeSemasi, IUrunFormGirdisi, IUrunFormVerisi } from "../schema/ProductSchema";
 import { IProduct, ProductCategory } from "../types";
 import { useDovizKurlari, tryeVevir } from "@/core/hooks/useExchangeRates";
 import { DESTEKLENEN_KURLAR } from "@/core/constants/currencies";
@@ -28,7 +28,7 @@ export const ProductForm: React.FC<IProductFormProps> = ({
     handleSubmit,
     watch,
     formState: { errors },
-  } = useForm<IUrunFormVerisi>({
+  } = useForm<IUrunFormGirdisi, unknown, IUrunFormVerisi>({
     resolver: zodResolver(urunEklemeSemasi),
     defaultValues: {
       name: ilkVeriler?.name || "",

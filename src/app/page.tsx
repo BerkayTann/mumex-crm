@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
+import { aktifKullaniciyiGetir } from "@/features/auth/lib/server";
 
-export default function RootPage() {
-  // Kullanıcı localhost:3000'e girdiğinde direkt olarak CRM'in ana modülüne (dashboard) yönlendiriyoruz
-  redirect("/dashboard");
+export default async function RootPage() {
+  const kullanici = await aktifKullaniciyiGetir();
+  redirect(kullanici ? "/dashboard" : "/login");
 }

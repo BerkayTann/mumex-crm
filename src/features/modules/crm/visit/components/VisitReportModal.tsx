@@ -101,7 +101,7 @@ export const VisitReportModal: React.FC<IVisitReportModalProps> = ({
 
     const periyotAd = PERIYOT_BILGISI[seciliPeriyot].label;
     const tarihStr = new Date().toLocaleDateString("tr-TR").replace(/\./g, "-");
-    XLSX.writeFile(wb, `Mumex_Raporu_${periyotAd}_${tarihStr}.xlsx`);
+    XLSX.writeFile(wb, `Mumex.iL_Raporu_${periyotAd}_${tarihStr}.xlsx`);
   };
 
   if (!acikMi) return null;

@@ -1,14 +1,14 @@
 ---
 description: Proje kodlama standartları, mimari kurallar, DDD/FBA prensipleri ve best practices.
 alwaysApply: true
-project: Mumex.in (Mümessil CRM)
+project: Mumex.iL (Mümessil CRM)
 domain: crm
 ---
 
 # 🚀 Proje Bağlamı ve Kimliği (Project Context)
 
 Bu proje, ilaç mümessillerinin doktor, hastane ve eczane ziyaretlerini yönettiği, satışlarını takip ettiği ve akıllı analizler sunan bir **B2B SaaS CRM** uygulamasıdır. 
-Sahada hareket halinde olan kullanıcılar için sistemin hızlı, verimli, mobil uyumlu ve ölçeklenebilir olması kritiktir.Mumex.in, ilaç mümessillerinin saha operasyonlarını manuel Excel süreçlerinden kurtarıp dijitalleştiren, veri odaklı kararlar almalarını sağlayan modüler bir SaaS CRM platformudur.
+Sahada hareket halinde olan kullanıcılar için sistemin hızlı, verimli, mobil uyumlu ve ölçeklenebilir olması kritiktir.Mumex.iL, ilaç mümessillerinin saha operasyonlarını manuel Excel süreçlerinden kurtarıp dijitalleştiren, veri odaklı kararlar almalarını sağlayan modüler bir SaaS CRM platformudur.
 
 ## 🛠️ Teknoloji Yığını (Tech Stack)
 - **Frontend:** Next.js 15 (App Router), React, TypeScript, Tailwind CSS, shadcn/ui

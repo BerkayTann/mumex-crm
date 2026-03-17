@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { kisiEklemeSemasi, IKisiFormVerisi } from "../schema/UserSchema";
+import { kisiEklemeSemasi, IKisiFormGirdisi, IKisiFormVerisi } from "../schema/UserSchema";
 import { IUser, UserTitle } from "../types";
 import { CompanyType } from "../../company/types";
 import { TURKIYE_ILLERI, ildenBolgeGetir } from "@/core/constants/cities";
@@ -33,7 +33,7 @@ export const UserForm: React.FC<IUserFormProps> = ({
     setValue,
     watch,
     formState: { errors },
-  } = useForm<IKisiFormVerisi>({
+  } = useForm<IKisiFormGirdisi, unknown, IKisiFormVerisi>({
     resolver: zodResolver(kisiEklemeSemasi),
     defaultValues: {
       firstName: ilkVeriler?.firstName || "",

@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ziyaretEklemeSemasi, IVisitFormVerisi } from "../schema/VisitSchema";
+import { ziyaretEklemeSemasi, IVisitFormGirdisi, IVisitFormVerisi } from "../schema/VisitSchema";
 import { IVisit, VisitStatus } from "../types";
 import { ICompany } from "../../company/types";
 import { IUser } from "../../users/types";
@@ -38,7 +38,7 @@ export const VisitForm: React.FC<IVisitFormProps> = ({
     watch,
     setValue,
     formState: { errors },
-  } = useForm<IVisitFormVerisi>({
+  } = useForm<IVisitFormGirdisi, unknown, IVisitFormVerisi>({
     resolver: zodResolver(ziyaretEklemeSemasi),
     defaultValues: ilkVeriler
       ? {

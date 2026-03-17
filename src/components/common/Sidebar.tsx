@@ -9,9 +9,11 @@ import {
   Users,
   Package,
   MapPin,
-  Settings,
+  UserRound,
+  LogOut,
   X,
 } from "lucide-react";
+import { useAuth } from "@/features/auth/components/AuthProvider";
 
 interface IMenuElemani {
   baslik: string;
@@ -20,11 +22,12 @@ interface IMenuElemani {
 }
 
 const menuElemanlari: IMenuElemani[] = [
-  { baslik: "Dashboard", yol: "/dashboard", ikon: LayoutDashboard },
-  { baslik: "Kişiler (Doktorlar)", yol: "/users", ikon: Users },
+  { baslik: "Ana Sayfa", yol: "/dashboard", ikon: LayoutDashboard },
+  { baslik: "Musteriler", yol: "/users", ikon: Users },
   { baslik: "Kurumlar", yol: "/company", ikon: Building2 },
-  { baslik: "Ürünler", yol: "/product", ikon: Package },
-  { baslik: "Ziyaretler", yol: "/visit", ikon: MapPin },
+  { baslik: "Urunler", yol: "/product", ikon: Package },
+  { baslik: "Satis ve Ziyaret", yol: "/visit", ikon: MapPin },
+  { baslik: "Profilim", yol: "/profile", ikon: UserRound },
 ];
 
 interface ISidebarProps {
@@ -35,44 +38,43 @@ interface ISidebarProps {
 
 export const Sidebar = ({ acikMi, daralmisMi, onKapat }: ISidebarProps) => {
   const aktifYol = usePathname();
+  const { user, logout, isLoggingOut } = useAuth();
 
   return (
     <aside
       className={`
-        fixed inset-y-0 left-0 z-40 bg-slate-900 text-slate-300 flex flex-col
-        transition-all duration-300 w-64
+        fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground shadow-xl
+        transition-all duration-300
         lg:relative lg:z-auto lg:translate-x-0
         ${acikMi ? "translate-x-0" : "-translate-x-full"}
         ${daralmisMi ? "lg:w-16 lg:overflow-hidden" : "lg:w-64"}
       `}
     >
-      {/* Logo ve Marka Alanı */}
-      <div className="h-16 flex items-center justify-between px-4 bg-slate-950 text-white font-bold text-xl tracking-wider shrink-0">
+      <div className="flex h-16 shrink-0 items-center justify-between border-b border-sidebar-border bg-sidebar px-4 text-xl font-bold tracking-wider text-sidebar-foreground shadow-sm">
         <Link
           href="/dashboard"
           onClick={onKapat}
-          className={`hover:opacity-80 transition-opacity ${daralmisMi ? "mx-auto" : "flex-1 min-w-0"}`}
+          className={`transition-opacity hover:opacity-80 ${daralmisMi ? "mx-auto" : "min-w-0 flex-1"}`}
         >
           {daralmisMi ? (
-            <span className="text-blue-500">✦</span>
+            <span className="text-primary">✦</span>
           ) : (
-            <span className="truncate block">
-              <span className="text-blue-500 mr-2">✦</span> Mumex
-              <span className="text-slate-400 font-light">.in</span>
+            <span className="block truncate">
+              <span className="mr-2 text-primary">✦</span> Mumex
+              <span className="font-light text-muted-foreground">.iL</span>
             </span>
           )}
         </Link>
         <button
           onClick={onKapat}
-          className="lg:hidden p-1 text-slate-400 hover:text-white rounded shrink-0"
+          className="shrink-0 rounded p-1 text-muted-foreground hover:text-foreground lg:hidden"
           aria-label="Menüyü kapat"
         >
-          <X className="w-5 h-5" />
+          <X className="h-5 w-5" />
         </button>
       </div>
 
-      {/* Navigasyon Linkleri */}
-      <nav className="flex-1 py-6 flex flex-col gap-1 px-2 overflow-y-auto">
+      <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-2 py-6">
         {menuElemanlari.map((eleman) => {
           const aktifMi = aktifYol.startsWith(eleman.yol);
           return (
@@ -81,13 +83,16 @@ export const Sidebar = ({ acikMi, daralmisMi, onKapat }: ISidebarProps) => {
               href={eleman.yol}
               onClick={onKapat}
               title={daralmisMi ? eleman.baslik : undefined}
-              className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-colors duration-200
-                ${aktifMi ? "bg-blue-600 text-white font-medium shadow-md" : "hover:bg-slate-800 hover:text-white"}
-                ${daralmisMi ? "justify-center" : ""}
-              `}
+              className={`flex items-center gap-3 rounded-lg px-3 py-3 transition-colors duration-200 ${
+                aktifMi
+                  ? "bg-sidebar-primary font-medium text-sidebar-primary-foreground shadow-sm"
+                  : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-sm"
+              } ${daralmisMi ? "justify-center" : ""}`}
             >
               <eleman.ikon
-                className={`w-5 h-5 shrink-0 ${aktifMi ? "text-white" : "text-slate-400"}`}
+                className={`h-5 w-5 shrink-0 ${
+                  aktifMi ? "text-sidebar-primary-foreground" : "text-muted-foreground"
+                }`}
               />
               {!daralmisMi && <span className="truncate">{eleman.baslik}</span>}
             </Link>
@@ -95,37 +100,36 @@ export const Sidebar = ({ acikMi, daralmisMi, onKapat }: ISidebarProps) => {
         })}
       </nav>
 
-      {/* Ayarlar Linki */}
-      <div className="px-2 pb-2">
-        <Link
-          href="/settings"
-          onClick={onKapat}
-          title={daralmisMi ? "Ayarlar" : undefined}
-          className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-colors duration-200 hover:bg-slate-800 hover:text-white
-            ${aktifYol.startsWith("/settings") ? "bg-blue-600 text-white font-medium" : ""}
-            ${daralmisMi ? "justify-center" : ""}
-          `}
-        >
-          <Settings
-            className={`w-5 h-5 shrink-0 ${aktifYol.startsWith("/settings") ? "text-white" : "text-slate-400"}`}
-          />
-          {!daralmisMi && <span className="truncate">Ayarlar</span>}
-        </Link>
-      </div>
+      <div className="shrink-0 border-t border-sidebar-border bg-sidebar p-3">
+        {user ? (
+          <div className="space-y-3">
+            <Link
+              href="/profile"
+              onClick={onKapat}
+              className={`flex items-center gap-3 rounded-2xl border border-sidebar-border/60 bg-sidebar-accent/40 px-3 py-3 ${daralmisMi ? "justify-center" : ""}`}
+            >
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sidebar-accent text-sm font-bold text-sidebar-foreground">
+                {user.initials}
+              </div>
+              {!daralmisMi && (
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-sidebar-foreground">{user.fullName}</p>
+                  <p className="truncate text-xs text-muted-foreground">{user.jobTitle}</p>
+                </div>
+              )}
+            </Link>
 
-      {/* Alt Kullanıcı Alanı */}
-      <div className="p-3 bg-slate-950 border-t border-slate-800 shrink-0">
-        <div className={`flex items-center gap-3 ${daralmisMi ? "justify-center" : ""}`}>
-          <div className="w-9 h-9 rounded-full bg-slate-700 flex items-center justify-center text-white font-bold shrink-0 text-sm">
-            AE
+            <button
+              type="button"
+              onClick={logout}
+              disabled={isLoggingOut}
+              className={`flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-sm transition-colors hover:bg-sidebar-accent disabled:opacity-70 ${daralmisMi ? "justify-center" : ""}`}
+            >
+              <LogOut className="h-4 w-4 shrink-0 text-muted-foreground" />
+              {!daralmisMi && <span>{isLoggingOut ? "Çıkış yapılıyor..." : "Oturumu kapat"}</span>}
+            </button>
           </div>
-          {!daralmisMi && (
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-white truncate">Ali Yılmaz</p>
-              <p className="text-xs text-slate-500 truncate">Kıdemli Mümessil</p>
-            </div>
-          )}
-        </div>
+        ) : null}
       </div>
     </aside>
   );

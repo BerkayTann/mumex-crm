@@ -1,13 +1,15 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { useZiyaretleriGetir } from "../../visit/service";
 import { useKisileriGetir } from "../../users/service";
 import { useSirketleriGetir } from "../../company/service";
 import { StatCard } from "../components";
 import { Banknote, MapPin, Users, Building2, TrendingUp } from "lucide-react";
+import { useAuth } from "@/features/auth/components/AuthProvider";
 
 export const DashboardContainer = () => {
+  const { user } = useAuth();
   const { data: ziyaretler, isLoading: zYukleniyor } = useZiyaretleriGetir();
   const { data: kisiler, isLoading: kYukleniyor } = useKisileriGetir();
   const { data: sirketler, isLoading: sYukleniyor } = useSirketleriGetir();
@@ -15,10 +17,7 @@ export const DashboardContainer = () => {
   const istatistikler = useMemo(() => {
     if (!ziyaretler || !kisiler || !sirketler) return null;
 
-    const toplamCiro = ziyaretler.reduce(
-      (toplam, z) => toplam + z.totalAmount,
-      0,
-    );
+    const toplamCiro = ziyaretler.reduce((toplam, z) => toplam + z.totalAmount, 0);
 
     const buAy = new Date().getMonth();
     const buAykiCiro = ziyaretler
@@ -26,10 +25,7 @@ export const DashboardContainer = () => {
       .reduce((toplam, z) => toplam + z.totalAmount, 0);
 
     const sonZiyaretler = [...ziyaretler]
-      .sort(
-        (a, b) =>
-          new Date(b.visitDate).getTime() - new Date(a.visitDate).getTime(),
-      )
+      .sort((a, b) => new Date(b.visitDate).getTime() - new Date(a.visitDate).getTime())
       .slice(0, 5);
 
     return {
@@ -44,8 +40,8 @@ export const DashboardContainer = () => {
 
   if (zYukleniyor || kYukleniyor || sYukleniyor) {
     return (
-      <div className="p-10 flex justify-center">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+      <div className="flex justify-center p-10">
+        <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-blue-600"></div>
       </div>
     );
   }
@@ -56,17 +52,15 @@ export const DashboardContainer = () => {
   const ciroAltMetin = `Bu Ay: ${istatistikler.buAykiCiro.toLocaleString("tr-TR")} ₺`;
 
   return (
-    <div className="w-full px-4 sm:px-6 lg:px-8 py-4 space-y-6">
+    <div className="w-full space-y-6 px-4 py-4 sm:px-6 lg:px-8">
       <div>
         <h1 className="text-2xl font-bold text-slate-800">
-          Hoş Geldin, Mümessil! 👋
+          Hoş Geldin {user?.firstName || user?.fullName || "Kullanıcı"}! 👋
         </h1>
-        <p className="text-slate-500 mt-1">
-          İşte sahadaki güncel satış ve ziyaret performansın.
-        </p>
+        <p className="mt-1 text-slate-500">İşte sahadaki güncel satış ve ziyaret performansın.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-4 lg:gap-6">
         <StatCard
           baslik="Toplam Ciro"
           deger={ciroGosterim}
@@ -98,47 +92,42 @@ export const DashboardContainer = () => {
         />
       </div>
 
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-slate-400" /> Son Satışlar ve
-            Ziyaretler
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <div className="flex items-center justify-between border-b border-slate-100 p-4 sm:p-5">
+          <h2 className="flex items-center gap-2 text-lg font-bold text-slate-800">
+            <TrendingUp className="h-5 w-5 text-slate-400" /> Son Satışlar ve Ziyaretler
           </h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead className="bg-slate-50 text-sm text-slate-500">
               <tr>
-                <th className="px-4 sm:px-5 py-3 font-medium">Tarih</th>
-                <th className="px-4 sm:px-5 py-3 font-medium">Kurum</th>
-                <th className="px-4 sm:px-5 py-3 font-medium">Doktor</th>
-                <th className="px-4 sm:px-5 py-3 font-medium text-right">
-                  Tutar
-                </th>
+                <th className="px-4 py-3 font-medium sm:px-5">Tarih</th>
+                <th className="px-4 py-3 font-medium sm:px-5">Kurum</th>
+                <th className="px-4 py-3 font-medium sm:px-5">Doktor</th>
+                <th className="px-4 py-3 text-right font-medium sm:px-5">Tutar</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-sm">
               {istatistikler.sonZiyaretler.map((z) => (
                 <tr key={z._id} className="hover:bg-slate-50">
-                  <td className="px-4 sm:px-5 py-3 text-slate-600">
+                  <td className="px-4 py-3 text-slate-600 sm:px-5">
                     {new Date(z.visitDate).toLocaleDateString("tr-TR")}
                   </td>
-                  <td className="px-4 sm:px-5 py-3 font-medium text-slate-800">
+                  <td className="px-4 py-3 font-medium text-slate-800 sm:px-5">
                     {typeof z.companyId === "object" ? z.companyId.name : "-"}
                   </td>
-                  <td className="px-4 sm:px-5 py-3 text-slate-600">
-                    {typeof z.userId === "object"
-                      ? `${z.userId.firstName} ${z.userId.lastName}`
-                      : "-"}
+                  <td className="px-4 py-3 text-slate-600 sm:px-5">
+                    {typeof z.userId === "object" ? `${z.userId.firstName} ${z.userId.lastName}` : "-"}
                   </td>
-                  <td className="px-4 sm:px-5 py-3 text-right font-bold text-emerald-600">
+                  <td className="px-4 py-3 text-right font-bold text-emerald-600 sm:px-5">
                     {z.totalAmount.toLocaleString("tr-TR")} ₺
                   </td>
                 </tr>
               ))}
               {istatistikler.sonZiyaretler.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="text-center py-8 text-slate-400">
+                  <td colSpan={4} className="py-8 text-center text-slate-400">
                     Henüz son aktivite bulunmuyor.
                   </td>
                 </tr>

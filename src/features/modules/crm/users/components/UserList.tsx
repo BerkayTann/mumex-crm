@@ -122,7 +122,7 @@ export const UserList: React.FC<IUserListProps> = ({
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
           <Users className="w-6 h-6 text-indigo-600" />
-          Kişiler ve Doktorlar
+          Müşteriler
         </h1>
         <button
           onClick={onYeniKisiEkleTiklandi}

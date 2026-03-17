@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   sirketEklemeSemasi,
+  type ISirketFormGirdisi,
   type ISirketFormVerisi,
 } from "../schema/CompanySchema";
 import { CompanyType, ICompany } from "../types";
@@ -30,7 +31,7 @@ export const CompanyForm: React.FC<ICompanyFormProps> = ({
     setValue,
     watch,
     formState: { errors },
-  } = useForm<ISirketFormVerisi>({
+  } = useForm<ISirketFormGirdisi, unknown, ISirketFormVerisi>({
     resolver: zodResolver(sirketEklemeSemasi),
     defaultValues: {
       isActive: true,
