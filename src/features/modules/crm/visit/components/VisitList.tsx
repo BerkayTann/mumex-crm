@@ -169,13 +169,13 @@ export const VisitList: React.FC<IVisitListProps> = ({
           />
         </div>
 
-        <div className="relative w-full md:w-48">
+        <div className="relative w-full md:w-48 min-w-0">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <Calendar className="h-4 w-4 text-slate-400" />
           </div>
           <input
             type="date"
-            className="block w-full pl-9 pr-3 py-2 border-b-2 border-transparent hover:border-slate-200 focus:border-purple-500 rounded-lg bg-slate-50/50 text-slate-700 focus:bg-white focus:outline-none focus:ring-4 focus:ring-purple-500/10 sm:text-sm transition-all cursor-pointer"
+            className="block w-full min-w-0 pl-9 pr-2 py-2 border-b-2 border-transparent hover:border-slate-200 focus:border-purple-500 rounded-lg bg-slate-50/50 text-slate-700 focus:bg-white focus:outline-none focus:ring-4 focus:ring-purple-500/10 text-sm transition-all cursor-pointer"
             value={tarihFiltresi}
             onChange={(e) => setTarihFiltresi(e.target.value)}
           />
