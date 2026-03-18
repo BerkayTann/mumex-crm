@@ -1,9 +1,9 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
-import { Bell, Search, Menu, Sun, Moon, Settings } from "lucide-react";
+import { Search, Menu, Sun, Moon, Settings } from "lucide-react";
 import { useTheme } from "@/core/providers/ThemeProvider";
+import { NotificationContainer } from "@/features/modules/crm/notification";
 
 interface IHeaderProps {
   onMenuAc: () => void;
@@ -19,6 +19,7 @@ export const Header = ({ onMenuAc }: IHeaderProps) => {
         <button
           onClick={onMenuAc}
           className="shrink-0 rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+          title="Menüyü aç"
           aria-label="Menüyü aç"
         >
           <Menu className="h-5 w-5" />
@@ -35,10 +36,7 @@ export const Header = ({ onMenuAc }: IHeaderProps) => {
       </div>
 
       <div className="ml-4 flex shrink-0 items-center gap-3">
-        <button className="relative rounded-full border border-transparent p-2 text-muted-foreground transition-colors hover:border-border/80 hover:bg-accent hover:text-accent-foreground hover:shadow-sm">
-          <Bell className="h-5 w-5" />
-          <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-primary" />
-        </button>
+        <NotificationContainer />
         <Link
           href="/settings"
           className="rounded-full border border-border/80 bg-card/95 p-2 text-muted-foreground shadow-sm transition-all hover:-translate-y-0.5 hover:border-ring hover:bg-accent hover:text-accent-foreground"

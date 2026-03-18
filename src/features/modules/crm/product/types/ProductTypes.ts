@@ -12,6 +12,7 @@ export interface IProduct {
     _id: string;
     name: string;
     category: ProductCategory;
+    quantity: number;       // Başlangıç stok adedi (depoya giren miktar)
     price: number;
     currency?: string;      // "TRY" | "USD" | "EUR" vb. — default "TRY"
     priceInTRY?: number;    // Kayıt anındaki TRY karşılığı (live kur ile hesaplanır)

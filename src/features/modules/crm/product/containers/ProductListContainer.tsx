@@ -39,6 +39,7 @@ export const ProductListContainer = () => {
       const payload: ICreateProductPayload = {
         name: formVerisi.name,
         category: formVerisi.category,
+        quantity: formVerisi.quantity,
         price: formVerisi.price,
         currency: formVerisi.currency,
         priceInTRY: formVerisi.priceInTRY,

@@ -12,6 +12,8 @@ import {
   UserRound,
   LogOut,
   X,
+  Warehouse,
+  CalendarDays,
 } from "lucide-react";
 import { useAuth } from "@/features/auth/components/AuthProvider";
 
@@ -26,7 +28,9 @@ const menuElemanlari: IMenuElemani[] = [
   { baslik: "Musteriler", yol: "/users", ikon: Users },
   { baslik: "Kurumlar", yol: "/company", ikon: Building2 },
   { baslik: "Urunler", yol: "/product", ikon: Package },
+  { baslik: "Depo / Stok", yol: "/inventory", ikon: Warehouse },
   { baslik: "Satis ve Ziyaret", yol: "/visit", ikon: MapPin },
+  { baslik: "Takvim", yol: "/calendar", ikon: CalendarDays },
   { baslik: "Profilim", yol: "/profile", ikon: UserRound },
 ];
 

@@ -12,6 +12,7 @@ const urunVeritabaniSemasi = new Schema<IProductDocument>(
       required: true 
     },
     // Veritabanına fiyat sütunu zorunlu (required) olarak eklendi
+    quantity: { type: Number, required: true, min: 0, default: 0 },
     price: { type: Number, required: true },
     currency: { type: String, default: 'TRY' },
     priceInTRY: { type: Number },
@@ -23,4 +24,9 @@ const urunVeritabaniSemasi = new Schema<IProductDocument>(
   }
 );
 
-export const ProductModel = mongoose.models.Product || mongoose.model<IProductDocument>('Product', urunVeritabaniSemasi);
+// Next.js Hot Reloading sırasında model şemasının güncellenmesini garanti altına almak için:
+if (mongoose.models.Product) {
+  delete mongoose.models.Product;
+}
+
+export const ProductModel = mongoose.model<IProductDocument>('Product', urunVeritabaniSemasi);

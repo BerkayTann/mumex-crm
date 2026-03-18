@@ -33,6 +33,7 @@ export const ProductForm: React.FC<IProductFormProps> = ({
     defaultValues: {
       name: ilkVeriler?.name || "",
       category: ilkVeriler?.category || ProductCategory.MEDICINE,
+      quantity: ilkVeriler?.quantity ?? 0,
       price: ilkVeriler?.price || 0,
       currency: ilkVeriler?.currency || "TRY",
       priceInTRY: ilkVeriler?.priceInTRY,
@@ -97,6 +98,7 @@ export const ProductForm: React.FC<IProductFormProps> = ({
         <div className="col-span-2 md:col-span-1">
           <label className="block text-sm font-medium text-slate-700 mb-1">Kategori</label>
           <select
+            title="Kategori Seçin"
             {...register("category")}
             className="w-full p-2 border rounded-md outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900"
           >
@@ -123,6 +125,7 @@ export const ProductForm: React.FC<IProductFormProps> = ({
               placeholder="0.00"
             />
             <select
+              title="Para Birimi Seçin"
               value={seciliDoviz}
               onChange={(e) => setSeciliDoviz(e.target.value)}
               disabled={kurYukleniyor}
@@ -159,6 +162,24 @@ export const ProductForm: React.FC<IProductFormProps> = ({
             <p className="text-xs text-amber-600 mt-1">
               ⚠ Canlı kur alınamadı. TRY seçilmesi önerilir.
             </p>
+          )}
+        </div>
+
+        {/* Başlangıç Stok Adedi */}
+        <div className="col-span-2 md:col-span-1">
+          <label className="block text-sm font-medium text-slate-700 mb-1">
+            Başlangıç Stok Adedi <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="number"
+            min="0"
+            step="1"
+            {...register("quantity", { valueAsNumber: true })}
+            className="w-full p-2 border rounded-md outline-none focus:ring-2 focus:ring-emerald-500 text-slate-900 placeholder:text-slate-400"
+            placeholder="0"
+          />
+          {errors.quantity && (
+            <p className="text-red-500 text-xs mt-1">{errors.quantity.message}</p>
           )}
         </div>
 

@@ -124,6 +124,7 @@ export const ProductList: React.FC<IProductListProps> = ({
             <Filter className="h-4 w-4 text-slate-400" />
           </div>
           <select
+            aria-label="Kategoriye Göre Filtrele"
             className="block w-full pl-9 pr-10 py-2 border-b-2 border-transparent hover:border-slate-200 focus:border-emerald-500 rounded-lg bg-slate-50/50 text-slate-700 focus:bg-white focus:outline-none focus:ring-4 focus:ring-emerald-500/10 sm:text-sm transition-all appearance-none cursor-pointer"
             value={kategoriFiltresi}
             onChange={(e) => setKategoriFiltresi(e.target.value)}
@@ -166,6 +167,9 @@ export const ProductList: React.FC<IProductListProps> = ({
               >
                 Kategori {renderSiralamaOki("category")}
               </th>
+              <th className="px-4 sm:px-5 py-3 text-sm font-semibold text-slate-600 text-right">
+                Stok
+              </th>
               <th
                 className="px-4 sm:px-5 py-3 text-sm font-semibold text-slate-600 text-right cursor-pointer hover:bg-slate-100 transition-colors select-none group"
                 onClick={() => siralamaDegistir("price")}
@@ -205,6 +209,10 @@ export const ProductList: React.FC<IProductListProps> = ({
                         ? "Takviye"
                         : "Tıbbi Cihaz"}
                   </span>
+                </td>
+                <td className="px-4 sm:px-5 py-3 text-right">
+                  <span className="font-medium text-slate-700">{urun.quantity ?? 0}</span>
+                  <span className="text-xs text-slate-400 ml-1">Adet</span>
                 </td>
                 <td className="px-4 sm:px-5 py-3 text-right">
                   <div className="font-semibold text-emerald-600">

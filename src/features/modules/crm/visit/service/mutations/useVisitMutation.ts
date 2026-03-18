@@ -21,6 +21,7 @@ export const useZiyaretEkle = () => {
     onSuccess: () => {
       sorguIstemcisi.invalidateQueries({ queryKey: ['ziyaretler'] });
       sorguIstemcisi.invalidateQueries({ queryKey: ['kisiler'] });
+      sorguIstemcisi.invalidateQueries({ queryKey: ['envanter'] });
     },
   });
 };
@@ -35,6 +36,7 @@ export const useZiyaretSil = () => {
     onSuccess: () => {
       sorguIstemcisi.invalidateQueries({ queryKey: ['ziyaretler'] });
       sorguIstemcisi.invalidateQueries({ queryKey: ['kisiler'] });
+      sorguIstemcisi.invalidateQueries({ queryKey: ['envanter'] });
     },
   });
 };
@@ -50,6 +52,7 @@ export const useZiyaretGuncelle = () => {
     onSuccess: () => {
       sorguIstemcisi.invalidateQueries({ queryKey: ['ziyaretler'] });
       sorguIstemcisi.invalidateQueries({ queryKey: ['kisiler'] });
+      sorguIstemcisi.invalidateQueries({ queryKey: ['envanter'] });
     },
   });
 };

@@ -298,7 +298,7 @@ export const VisitForm: React.FC<IVisitFormProps> = ({
             }
             className="flex items-center gap-1 text-sm bg-slate-800 text-white px-3 py-1.5 rounded"
           >
-            <Plus className="w-4 h-4" /> Satır Ekle
+            <Plus className="w-4 h-4" /> Satış Ekle
           </button>
         </div>
 
