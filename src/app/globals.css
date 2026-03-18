@@ -334,6 +334,8 @@
   }
 
   .bg-amber-100,
+  .bg-orange-50,
+  .bg-orange-100,
   .bg-yellow-50,
   .bg-yellow-100,
   .bg-yellow-400 {
@@ -361,6 +363,8 @@
   .text-amber-600,
   .text-amber-700,
   .text-amber-800,
+  .text-orange-600,
+  .text-orange-700,
   .text-yellow-700,
   .text-yellow-800,
   .text-yellow-900 {
@@ -386,6 +390,11 @@
 
   .border-yellow-200,
   .border-amber-200 {
+    border-color: color-mix(in oklab, var(--warning-fg) 22%, var(--stroke-soft)) !important;
+  }
+
+  .border-orange-100,
+  .border-orange-200 {
     border-color: color-mix(in oklab, var(--warning-fg) 22%, var(--stroke-soft)) !important;
   }
 
@@ -422,6 +431,10 @@
   .hover\:bg-purple-50:hover,
   .hover\:bg-emerald-50:hover {
     background-color: var(--surface-hover) !important;
+  }
+
+  .hover\:bg-orange-50:hover {
+    background-color: color-mix(in oklab, var(--warning-bg) 78%, var(--card)) !important;
   }
 
   .hover\:bg-red-50:hover {
@@ -493,5 +506,26 @@
   .shadow-xl,
   .shadow-2xl {
     box-shadow: var(--elevation-lg) !important;
+  }
+
+  .money-positive,
+  .money-positive * {
+    color: color-mix(in oklab, var(--success-fg) 92%, var(--foreground) 8%) !important;
+  }
+
+  .money-negative,
+  .money-negative * {
+    color: color-mix(in oklab, var(--danger-fg) 92%, var(--foreground) 8%) !important;
+  }
+
+  .money-neutral,
+  .money-neutral * {
+    color: var(--foreground) !important;
+  }
+
+  .money-positive,
+  .money-negative,
+  .money-neutral {
+    font-variant-numeric: tabular-nums;
   }
 }

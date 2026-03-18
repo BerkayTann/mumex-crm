@@ -9,6 +9,9 @@ export interface IAuthUser {
   phone?: string;
   company: string;
   jobTitle: string;
+  dailyCiroTarget: number;
+  weeklyCiroTarget: number;
+  monthlyCiroTarget: number;
   role: AuthRole;
   createdAt: string;
   updatedAt: string;

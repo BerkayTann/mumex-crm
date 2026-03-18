@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { veritabaninaBaglan } from "@/lib/dbConnect";
-import { profilGuncellemeSemasi } from "@/features/auth/schema/AuthSchema";
+import { profilBilgileriGuncellemeSemasi } from "@/features/auth/schema/AuthSchema";
 import { AuthUserModel } from "@/features/auth/schema/AuthUserModel";
 import {
   aktifKullaniciyiGetir,
@@ -48,7 +48,7 @@ export async function PATCH(request: NextRequest) {
     await veritabaninaBaglan();
 
     const body = await request.json();
-    const parsed = profilGuncellemeSemasi.safeParse(body);
+    const parsed = profilBilgileriGuncellemeSemasi.safeParse(body);
 
     if (!parsed.success) {
       return NextResponse.json(
@@ -119,6 +119,9 @@ export async function PATCH(request: NextRequest) {
           phone: updatedUser.phone,
           company: updatedUser.company,
           jobTitle: updatedUser.jobTitle,
+          dailyCiroTarget: updatedUser.dailyCiroTarget ?? 0,
+          weeklyCiroTarget: updatedUser.weeklyCiroTarget ?? 0,
+          monthlyCiroTarget: updatedUser.monthlyCiroTarget ?? 0,
           role: updatedUser.role,
           createdAt: updatedUser.createdAt.toISOString(),
           updatedAt: updatedUser.updatedAt.toISOString(),

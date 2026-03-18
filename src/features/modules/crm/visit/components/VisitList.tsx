@@ -17,6 +17,7 @@ import {
 import { ICompany } from "../../company/types";
 import { IUser } from "../../users/types";
 import { IProduct } from "../../product/types";
+import { MoneyText } from "@/components/common/MoneyText";
 
 export type VisitSortField = "date" | "company" | "totalAmount";
 
@@ -155,46 +156,56 @@ export const VisitList: React.FC<IVisitListProps> = ({
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-3 bg-white p-3 sm:p-4 rounded-xl border border-slate-100 shadow-sm">
-        <div className="relative flex-1">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-4 w-4 text-slate-400" />
+      <div className="grid gap-3 rounded-xl border border-slate-100 bg-white p-3 shadow-sm sm:p-4 md:grid-cols-[minmax(0,1.35fr)_minmax(0,220px)_minmax(0,220px)] md:items-end">
+        <div className="flex flex-col gap-1.5">
+          <label className="pl-1 text-xs font-medium text-slate-400">Arama</label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-4 w-4 text-slate-400" />
+            </div>
+            <input
+              type="text"
+              className="block w-full pl-9 pr-3 py-2.5 border-b-2 border-transparent hover:border-slate-200 focus:border-purple-500 rounded-lg bg-slate-50/50 text-slate-700 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-purple-500/10 sm:text-sm transition-all"
+              placeholder="Kurum, doktor veya ürün ara..."
+              value={aramaMetni}
+              onChange={(e) => setAramaMetni(e.target.value)}
+            />
           </div>
-          <input
-            type="text"
-            className="block w-full pl-9 pr-3 py-2 border-b-2 border-transparent hover:border-slate-200 focus:border-purple-500 rounded-lg bg-slate-50/50 text-slate-700 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-purple-500/10 sm:text-sm transition-all"
-            placeholder="Kurum, doktor veya ürün ara..."
-            value={aramaMetni}
-            onChange={(e) => setAramaMetni(e.target.value)}
-          />
         </div>
 
-        <div className="relative w-full md:w-48 min-w-0">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Calendar className="h-4 w-4 text-slate-400" />
-          </div>
+        <div className="flex flex-col gap-1.5">
+          <label className="flex items-center gap-1 pl-1 text-xs font-medium text-slate-400">
+            <Calendar className="h-3 w-3" />
+            Tarih
+          </label>
           <input
             type="date"
-            className="block w-full min-w-0 pl-9 pr-2 py-2 border-b-2 border-transparent hover:border-slate-200 focus:border-purple-500 rounded-lg bg-slate-50/50 text-slate-700 focus:bg-white focus:outline-none focus:ring-4 focus:ring-purple-500/10 text-sm transition-all cursor-pointer"
+            className="w-full py-2.5 px-3 border-b-2 border-transparent hover:border-slate-200 focus:border-purple-500 rounded-lg bg-slate-50/50 text-slate-700 text-sm focus:bg-white focus:outline-none focus:ring-4 focus:ring-purple-500/10 transition-all cursor-pointer"
             value={tarihFiltresi}
             onChange={(e) => setTarihFiltresi(e.target.value)}
           />
         </div>
 
-        <div className="relative w-full md:w-48">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Filter className="h-4 w-4 text-slate-400" />
+        <div className="flex flex-col gap-1.5">
+          <label className="flex items-center gap-1 pl-1 text-xs font-medium text-slate-400">
+            <Filter className="h-3 w-3" />
+            Durum
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Filter className="h-4 w-4 text-slate-400" />
+            </div>
+            <select
+              className="block w-full pl-9 pr-10 py-2.5 border-b-2 border-transparent hover:border-slate-200 focus:border-purple-500 rounded-lg bg-slate-50/50 text-slate-700 focus:bg-white focus:outline-none focus:ring-4 focus:ring-purple-500/10 sm:text-sm transition-all appearance-none cursor-pointer"
+              value={durumFiltresi}
+              onChange={(e) => setDurumFiltresi(e.target.value)}
+            >
+              <option value="TUMU">Tüm Durumlar</option>
+              <option value={VisitStatus.COMPLETED}>Tamamlandı</option>
+              <option value={VisitStatus.PLANNED}>Planlandı</option>
+              <option value={VisitStatus.CANCELLED}>İptal Edildi</option>
+            </select>
           </div>
-          <select
-            className="block w-full pl-9 pr-10 py-2 border-b-2 border-transparent hover:border-slate-200 focus:border-purple-500 rounded-lg bg-slate-50/50 text-slate-700 focus:bg-white focus:outline-none focus:ring-4 focus:ring-purple-500/10 sm:text-sm transition-all appearance-none cursor-pointer"
-            value={durumFiltresi}
-            onChange={(e) => setDurumFiltresi(e.target.value)}
-          >
-            <option value="TUMU">Tüm Durumlar</option>
-            <option value={VisitStatus.COMPLETED}>Tamamlandı</option>
-            <option value={VisitStatus.PLANNED}>Planlandı</option>
-            <option value={VisitStatus.CANCELLED}>İptal Edildi</option>
-          </select>
         </div>
       </div>
 
@@ -308,12 +319,11 @@ export const VisitList: React.FC<IVisitListProps> = ({
                   </div>
                 </td>
                 <td className="px-4 sm:px-5 py-3 text-right">
-                  <div className="font-bold text-emerald-700">
-                    {ziyaret.totalAmount.toLocaleString("tr-TR", {
-                      maximumFractionDigits: 2,
-                    })}{" "}
-                    ₺
-                  </div>
+                  <MoneyText
+                    as="div"
+                    value={ziyaret.totalAmount}
+                    className="font-bold"
+                  />
                 </td>
                 <td className="px-4 sm:px-5 py-3 text-right">
                   <div className="flex justify-end gap-2">
@@ -449,10 +459,9 @@ export const VisitList: React.FC<IVisitListProps> = ({
                               İşlem Gördüğü Çeviri
                             </span>
                             <span className="font-medium text-emerald-700">
-                              {(p.unitPriceInTRY ?? p.unitPrice).toLocaleString(
-                                "tr-TR",
-                              )}{" "}
-                              ₺
+                              <MoneyText
+                                value={p.unitPriceInTRY ?? p.unitPrice}
+                              />
                             </span>
                           </div>
                           <div className="col-span-2 bg-slate-50 p-2 rounded mt-1">
@@ -460,9 +469,11 @@ export const VisitList: React.FC<IVisitListProps> = ({
                               <span className="text-slate-500">
                                 Kayıt Edilen Satır Toplamı (TRY)
                               </span>
-                              <span className="font-bold text-slate-800 text-sm">
-                                {p.totalPrice.toLocaleString("tr-TR")} ₺
-                              </span>
+                              <MoneyText
+                                value={p.totalPrice}
+                                as="span"
+                                className="text-sm font-bold text-slate-800"
+                              />
                             </div>
                           </div>
                         </div>
@@ -481,9 +492,11 @@ export const VisitList: React.FC<IVisitListProps> = ({
               <span className="text-sm text-slate-500">
                 Ziyaret Toplam Cirosu:
               </span>
-              <span className="text-lg font-bold text-emerald-700">
-                {detayModalZiyaret.totalAmount.toLocaleString("tr-TR")} ₺
-              </span>
+              <MoneyText
+                value={detayModalZiyaret.totalAmount}
+                as="span"
+                className="text-lg font-bold"
+              />
             </div>
           </div>
         </div>

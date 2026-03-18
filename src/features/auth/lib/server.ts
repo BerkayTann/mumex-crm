@@ -1,4 +1,3 @@
-import { cache } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { veritabaninaBaglan } from "@/lib/dbConnect";
@@ -20,6 +19,9 @@ const varsayilanAdmin = {
   phone: "+90 555 000 00 00",
   company: "Mumex",
   jobTitle: "Sistem Yöneticisi",
+  dailyCiroTarget: 0,
+  weeklyCiroTarget: 0,
+  monthlyCiroTarget: 0,
   role: "ADMIN" as const,
   password: "Berkay1997",
 };
@@ -36,6 +38,9 @@ const kullaniciHaritala = (kullanici: IAuthUserDocument): IAuthSessionUser => {
     phone: kullanici.phone,
     company: kullanici.company,
     jobTitle: kullanici.jobTitle,
+    dailyCiroTarget: kullanici.dailyCiroTarget ?? 0,
+    weeklyCiroTarget: kullanici.weeklyCiroTarget ?? 0,
+    monthlyCiroTarget: kullanici.monthlyCiroTarget ?? 0,
     role: kullanici.role,
     createdAt: kullanici.createdAt.toISOString(),
     updatedAt: kullanici.updatedAt.toISOString(),
@@ -68,7 +73,7 @@ export const varsayilanAdminiGarantiEt = async () => {
   });
 };
 
-export const aktifKullaniciyiGetir = cache(async (): Promise<IAuthSessionUser | null> => {
+export const aktifKullaniciyiGetir = async (): Promise<IAuthSessionUser | null> => {
   await varsayilanAdminiGarantiEt();
   await suresiDolmusOturumlariTemizle();
 
@@ -91,7 +96,7 @@ export const aktifKullaniciyiGetir = cache(async (): Promise<IAuthSessionUser | 
   }
 
   return kullaniciHaritala(session.userId);
-});
+};
 
 export const kimlikDogrulamaZorunlu = async () => {
   const kullanici = await aktifKullaniciyiGetir();

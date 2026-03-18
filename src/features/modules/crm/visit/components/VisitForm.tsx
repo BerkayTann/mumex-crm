@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ziyaretEklemeSemasi, IVisitFormGirdisi, IVisitFormVerisi } from "../schema/VisitSchema";
@@ -8,6 +8,7 @@ import { IUser } from "../../users/types";
 import { IProduct } from "../../product/types";
 import { Plus, Trash2 } from "lucide-react";
 import { useDovizKurlari, tryeVevir } from "@/core/hooks/useExchangeRates";
+import { MoneyText } from "@/components/common/MoneyText";
 
 interface IVisitFormProps {
   sirketler: ICompany[];
@@ -296,7 +297,7 @@ export const VisitForm: React.FC<IVisitFormProps> = ({
                 unit: "Adet",
               })
             }
-            className="flex items-center gap-1 text-sm bg-slate-800 text-white px-3 py-1.5 rounded"
+            className="inline-flex items-center gap-1.5 rounded-md border border-primary/60 bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition hover:brightness-95 focus:outline-none focus:ring-2 focus:ring-primary/25"
           >
             <Plus className="w-4 h-4" /> Satış Ekle
           </button>
@@ -438,12 +439,12 @@ export const VisitForm: React.FC<IVisitFormProps> = ({
                   </div>
                   {/* TRY karşılığı */}
                   {satirDoviz !== "TRY" && satirBirimFiyatTRY > 0 && (
-                    <p className="text-xs text-slate-400 mt-0.5">
+                    <p className="text-xs mt-0.5">
                       ≈{" "}
-                      {satirBirimFiyatTRY.toLocaleString("tr-TR", {
-                        maximumFractionDigits: 2,
-                      })}{" "}
-                      ₺
+                      <MoneyText
+                        value={satirBirimFiyatTRY}
+                        as="span"
+                      />
                     </p>
                   )}
                 </div>
@@ -461,12 +462,11 @@ export const VisitForm: React.FC<IVisitFormProps> = ({
                           {satirDoviz}
                         </span>
                       )}
-                      <span className="font-semibold text-emerald-700">
-                        {satirToplamTRY.toLocaleString("tr-TR", {
-                          maximumFractionDigits: 2,
-                        })}{" "}
-                        ₺
-                      </span>
+                      <MoneyText
+                        value={satirToplamTRY}
+                        as="span"
+                        className="font-semibold"
+                      />
                     </p>
                   </div>
                 )}
@@ -503,18 +503,13 @@ export const VisitForm: React.FC<IVisitFormProps> = ({
           <div className="mt-3 pt-3 border-t border-slate-200 flex justify-end">
             <p className="text-sm font-semibold text-slate-700">
               Tahmini Toplam:{" "}
-              <span className="text-emerald-700 text-base">
-                {(izlenenUrunler || [])
-                  .reduce((toplam, p) => {
-                    return (
-                      toplam +
-                      (p?.quantity || 0) *
-                        (p?.unitPriceInTRY ?? p?.unitPrice ?? 0)
-                    );
-                  }, 0)
-                  .toLocaleString("tr-TR", { maximumFractionDigits: 2 })}{" "}
-                ₺
-              </span>
+              <MoneyText
+                value={(izlenenUrunler || []).reduce((toplam, p) => {
+                  return toplam + (p?.quantity || 0) * (p?.unitPriceInTRY ?? p?.unitPrice ?? 0);
+                }, 0)}
+                as="span"
+                className="text-base"
+              />
             </p>
           </div>
         )}

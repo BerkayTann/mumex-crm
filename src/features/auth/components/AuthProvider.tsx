@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, startTransition, useContext, useState } from "react";
+import React, { createContext, startTransition, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { IAuthSessionUser } from "../types/AuthTypes";
 
@@ -24,6 +24,10 @@ export const AuthProvider = ({
   const router = useRouter();
   const [user, setUser] = useState<IAuthSessionUser | null>(initialUser);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  useEffect(() => {
+    setUser(initialUser);
+  }, [initialUser]);
 
   const refreshUser = async () => {
     const response = await fetch("/api/auth/me", {
@@ -83,4 +87,3 @@ export const useAuth = () => {
 
   return context;
 };
-

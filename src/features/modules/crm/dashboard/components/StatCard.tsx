@@ -4,17 +4,21 @@ import Link from "next/link";
 
 interface IStatCardProps {
   baslik: string;
-  deger: string | number;
+  deger: React.ReactNode;
+  degerClassName?: string;
   Ikon: LucideIcon;
   renkClass: string;
   altMetin?: string;
+  altIcerik?: React.ReactNode;
   href?: string;
 }
 
 export const StatCard: React.FC<IStatCardProps> = ({
   baslik,
   deger,
+  degerClassName,
   altMetin,
+  altIcerik,
   Ikon,
   renkClass,
   href,
@@ -30,8 +34,12 @@ export const StatCard: React.FC<IStatCardProps> = ({
       </div>
       <div>
         <p className="text-sm font-medium text-slate-500 mb-1">{baslik}</p>
-        <h3 className="text-2xl font-bold text-slate-800">{deger}</h3>
-        {altMetin && <p className="text-xs text-slate-400 mt-1">{altMetin}</p>}
+        <div className={`text-2xl font-bold text-slate-800 ${degerClassName ?? ""}`}>{deger}</div>
+        {altIcerik ? (
+          <div className="mt-2">{altIcerik}</div>
+        ) : (
+          altMetin && <p className="text-xs text-slate-400 mt-1">{altMetin}</p>
+        )}
       </div>
     </div>
   );

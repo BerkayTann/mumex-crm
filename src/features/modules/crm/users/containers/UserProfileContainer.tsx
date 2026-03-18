@@ -5,6 +5,7 @@ import { useKullaniciProfiliGetir } from "../service/queries/useUserProfileQueri
 import { Bolgeler, BolgeTemalari } from "@/core/constants/regions";
 import { ildenBolgeGetir } from "@/core/constants/cities";
 import { MapPin, Phone, Mail, Award, Calendar, Package } from "lucide-react";
+import { MoneyText } from "@/components/common/MoneyText";
 
 interface IProps {
   userId: string;
@@ -153,9 +154,11 @@ export const UserProfileContainer: React.FC<IProps> = ({ userId }) => {
           <p className="text-slate-500 text-sm font-medium mb-1">
             Toplam Sağlanan Ciro
           </p>
-          <h3 className="text-3xl font-bold text-emerald-600">
-            {analiz.toplamCiro.toLocaleString("tr-TR")} ₺
-          </h3>
+          <MoneyText
+            value={analiz.toplamCiro}
+            as="h3"
+            className="text-3xl font-bold"
+          />
         </div>
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
           <p className="text-slate-500 text-sm font-medium mb-1">
@@ -202,9 +205,7 @@ export const UserProfileContainer: React.FC<IProps> = ({ userId }) => {
                       {urun.adet} Adet Satıldı
                     </p>
                   </div>
-                  <div className="font-bold text-emerald-600">
-                    {urun.ciro.toLocaleString("tr-TR")} ₺
-                  </div>
+                  <MoneyText value={urun.ciro} as="div" className="font-bold" />
                 </div>
               ))
             ) : (
@@ -245,8 +246,8 @@ export const UserProfileContainer: React.FC<IProps> = ({ userId }) => {
                         {z.status}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-right font-bold text-slate-800">
-                      {z.totalAmount.toLocaleString("tr-TR")} ₺
+                    <td className="px-4 py-3 text-right font-bold">
+                      <MoneyText value={z.totalAmount} />
                     </td>
                   </tr>
                 ))}

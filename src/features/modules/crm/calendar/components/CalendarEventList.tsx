@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { tr } from "date-fns/locale";
 import { Plus, MapPin, Package, Truck, Calendar, Star } from "lucide-react";
 import { ICalendarEvent, CalendarEventSource, ETKINLIK_ETIKETLERI } from "../types";
+import { MoneyText } from "@/components/common/MoneyText";
 
 interface ICalendarEventListProps {
   etkinlikler: ICalendarEvent[];
@@ -90,9 +91,11 @@ export const CalendarEventList = ({
                       </p>
                     )}
                     {etkinlik.meta?.amount && (
-                      <p className="mt-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                        {etkinlik.meta.amount.toLocaleString("tr-TR")} ₺
-                      </p>
+                      <MoneyText
+                        value={etkinlik.meta.amount}
+                        as="p"
+                        className="mt-0.5 text-xs font-medium"
+                      />
                     )}
                     {etkinlik.meta?.description && (
                       <p className="mt-0.5 truncate text-xs text-muted-foreground">

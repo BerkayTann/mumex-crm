@@ -5,6 +5,7 @@ import { urunEklemeSemasi, IUrunFormGirdisi, IUrunFormVerisi } from "../schema/P
 import { IProduct, ProductCategory } from "../types";
 import { useDovizKurlari, tryeVevir } from "@/core/hooks/useExchangeRates";
 import { DESTEKLENEN_KURLAR } from "@/core/constants/currencies";
+import { MoneyText } from "@/components/common/MoneyText";
 
 interface IProductFormProps {
   onFormuGonder: (veri: IUrunFormVerisi) => void;
@@ -145,12 +146,20 @@ export const ProductForm: React.FC<IProductFormProps> = ({
           {tryKarsiligi !== null && girilenFiyat > 0 && (
             <p className="text-xs text-slate-500 mt-1.5">
               ≈{" "}
-              <span className="font-semibold text-emerald-700">
-                {tryKarsiligi.toLocaleString("tr-TR", { maximumFractionDigits: 2 })} ₺
-              </span>
+              <MoneyText
+                value={tryKarsiligi}
+                as="span"
+                className="font-semibold"
+              />
               {birDovizTry !== null && (
-                <span className="ml-2 text-slate-400">
-                  (1 {seciliDoviz} = {birDovizTry.toLocaleString("tr-TR", { maximumFractionDigits: 2 })} ₺)
+                <span className="ml-2">
+                  (1 {seciliDoviz} ={" "}
+                  <MoneyText
+                    value={birDovizTry}
+                    as="span"
+                    className="font-medium"
+                  />
+                  )
                 </span>
               )}
             </p>

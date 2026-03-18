@@ -2,6 +2,16 @@ import { z } from "zod";
 
 const usernameRegex = /^[a-z0-9._-]+$/i;
 
+const ciroHedefiSemasi = z.preprocess((value) => {
+  if (value === "" || value === null || value === undefined) return 0;
+  if (typeof value === "number" && Number.isNaN(value)) return 0;
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    return Number.isNaN(parsed) ? 0 : parsed;
+  }
+  return value;
+}, z.number().min(0, "Ciro hedefi 0 veya üzeri olmalıdır."));
+
 export const kayitOlSemasi = z.object({
   firstName: z.string().trim().min(2, "Ad en az 2 karakter olmalıdır."),
   lastName: z.string().trim().min(2, "Soyad en az 2 karakter olmalıdır."),
@@ -29,7 +39,17 @@ export const girisSemasi = z.object({
   password: z.string().min(1, "Parola zorunludur."),
 });
 
-export const profilGuncellemeSemasi = kayitOlSemasi.omit({ password: true });
+export const profilBilgileriGuncellemeSemasi = kayitOlSemasi.omit({ password: true });
+
+export const ciroHedefleriGuncellemeSemasi = z.object({
+  dailyCiroTarget: ciroHedefiSemasi,
+  weeklyCiroTarget: ciroHedefiSemasi,
+  monthlyCiroTarget: ciroHedefiSemasi,
+});
+
+export const profilGuncellemeSemasi = profilBilgileriGuncellemeSemasi.extend(
+  ciroHedefleriGuncellemeSemasi.shape,
+);
 
 export const sifreDegistirmeSemasi = z
   .object({
@@ -44,5 +64,7 @@ export const sifreDegistirmeSemasi = z
 
 export type IKayitOlVerisi = z.infer<typeof kayitOlSemasi>;
 export type IGirisVerisi = z.infer<typeof girisSemasi>;
+export type IProfilBilgileriGuncellemeVerisi = z.infer<typeof profilBilgileriGuncellemeSemasi>;
+export type ICiroHedefleriGuncellemeVerisi = z.infer<typeof ciroHedefleriGuncellemeSemasi>;
 export type IProfilGuncellemeVerisi = z.infer<typeof profilGuncellemeSemasi>;
 export type ISifreDegistirmeVerisi = z.infer<typeof sifreDegistirmeSemasi>;

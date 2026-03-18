@@ -12,6 +12,7 @@ import {
   ArrowUp,
   ArrowDown,
 } from "lucide-react";
+import { MoneyText } from "@/components/common/MoneyText";
 
 export type ProductSortField = "name" | "category" | "price" | "status";
 
@@ -215,19 +216,20 @@ export const ProductList: React.FC<IProductListProps> = ({
                   <span className="text-xs text-slate-400 ml-1">Adet</span>
                 </td>
                 <td className="px-4 sm:px-5 py-3 text-right">
-                  <div className="font-semibold text-emerald-600">
-                    {urun.price.toLocaleString("tr-TR")}{" "}
-                    {!urun.currency || urun.currency === "TRY" ? "₺" : urun.currency}
-                  </div>
+                  <MoneyText
+                    as="div"
+                    value={urun.price}
+                    currency={urun.currency || "TRY"}
+                    className="font-semibold"
+                  />
                   {urun.currency &&
                     urun.currency !== "TRY" &&
                     urun.priceInTRY != null && (
-                      <div className="text-xs text-slate-400 mt-0.5">
-                        {urun.priceInTRY.toLocaleString("tr-TR", {
-                          maximumFractionDigits: 2,
-                        })}{" "}
-                        ₺
-                      </div>
+                      <MoneyText
+                        as="div"
+                        value={urun.priceInTRY}
+                        className="mt-0.5 text-xs"
+                      />
                     )}
                 </td>
                 <td className="px-4 sm:px-5 py-3">

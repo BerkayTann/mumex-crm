@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { Search, Warehouse } from 'lucide-react';
 import { IEnvanterKalemi } from '../types';
 import { ProductCategory } from '../../product/types';
+import { MoneyText } from '@/components/common/MoneyText';
 
 interface IInventoryTableProps {
   kalemler: IEnvanterKalemi[];
@@ -96,12 +97,17 @@ export const InventoryTable: React.FC<IInventoryTableProps> = ({
                   </span>
                 </td>
                 <td className="px-4 sm:px-5 py-3 text-right text-slate-600">
-                  {(kalem.birimFiyatTRY ?? 0).toLocaleString('tr-TR', { maximumFractionDigits: 2 })} ₺
+                  <MoneyText
+                    value={kalem.birimFiyatTRY ?? 0}
+                    className="font-medium"
+                  />
                 </td>
                 <td className="px-4 sm:px-5 py-3 text-right">
-                  <span className="font-semibold text-slate-800">
-                    {(kalem.stokDegeri ?? 0).toLocaleString('tr-TR', { maximumFractionDigits: 0 })} ₺
-                  </span>
+                  <MoneyText
+                    value={kalem.stokDegeri ?? 0}
+                    maximumFractionDigits={0}
+                    className="font-semibold text-slate-800"
+                  />
                 </td>
               </tr>
             ))}
