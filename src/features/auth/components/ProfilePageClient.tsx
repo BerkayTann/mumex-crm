@@ -11,6 +11,7 @@ import {
   CalendarClock,
   Crown,
   KeyRound,
+  LogOut,
   PencilLine,
   Settings,
   Sparkles,
@@ -241,9 +242,9 @@ export const ProfilePageClient = () => {
         </div>
       </section>
 
-      <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-        <section className={`rounded-[2rem] border border-border/60 bg-card/82 p-6 backdrop-blur-2xl ${interactiveClass}`} style={{ boxShadow: cardShadow }}>
-          <div className="mb-7 flex items-center gap-3">
+      <div className="grid gap-6 xl:grid-cols-2">
+        <section className={`h-full rounded-[2rem] border border-border/60 bg-card/82 p-6 backdrop-blur-2xl ${interactiveClass}`} style={{ boxShadow: cardShadow }}>
+          <div className="mb-5 flex items-center gap-3">
             <PencilLine className="h-5 w-5 text-primary" />
             <div>
               <h2 className="text-xl font-black text-foreground">Profil Bilgileri</h2>
@@ -251,16 +252,18 @@ export const ProfilePageClient = () => {
             </div>
           </div>
 
-          <form className="grid gap-6 md:grid-cols-2" onSubmit={handleSubmit}>
+          <form className="grid gap-4 md:grid-cols-2" onSubmit={handleSubmit}>
             <ProfileField label="Ad" error={form.formState.errors.firstName?.message} placeholder="Ad" {...form.register("firstName")} />
             <ProfileField label="Soyad" error={form.formState.errors.lastName?.message} placeholder="Soyad" {...form.register("lastName")} />
             <ProfileField label="Kullanıcı Adı" error={form.formState.errors.username?.message} placeholder="Kullanıcı adı" {...form.register("username")} />
             <ProfileField label="E-posta" type="email" error={form.formState.errors.email?.message} placeholder="E-posta" {...form.register("email")} />
             <ProfileField label="Telefon" hint="Opsiyonel" error={form.formState.errors.phone?.message} placeholder="Telefon" {...form.register("phone")} />
             <ProfileField label="Şirket" error={form.formState.errors.company?.message} placeholder="Şirket" {...form.register("company")} />
-            <ProfileField label="Ünvan" error={form.formState.errors.jobTitle?.message} placeholder="Ünvan" {...form.register("jobTitle")} />
+            <div className="md:col-span-2">
+              <ProfileField label="Ünvan" error={form.formState.errors.jobTitle?.message} placeholder="Ünvan" {...form.register("jobTitle")} />
+            </div>
 
-            <div className="md:col-span-2 flex flex-wrap gap-3 pt-2">
+            <div className="md:col-span-2 flex flex-wrap gap-3 pt-1">
               <button
                 type="submit"
                 disabled={form.formState.isSubmitting}
@@ -280,102 +283,100 @@ export const ProfilePageClient = () => {
           </form>
         </section>
 
-        <section className="space-y-6">
-          <div className={`rounded-[2rem] border border-border/60 bg-card/82 p-6 backdrop-blur-2xl ${interactiveClass}`} style={{ boxShadow: cardShadow }}>
-            <div className="mb-7 flex items-center gap-3">
-              <KeyRound className="h-5 w-5 text-primary" />
-              <div>
-                <h2 className="text-xl font-black text-foreground">Şifre Değiştir</h2>
-                <p className="mt-1 text-sm text-foreground/62">Mevcut şifreni doğrula ve yeni şifre belirle.</p>
-              </div>
-            </div>
-
-            <form className="space-y-6" onSubmit={handlePasswordSubmit}>
-              <ProfileField
-                label="Mevcut Şifre"
-                type="password"
-                placeholder="Mevcut şifre"
-                error={passwordForm.formState.errors.currentPassword?.message}
-                {...passwordForm.register("currentPassword")}
-              />
-              <ProfileField
-                label="Yeni Şifre"
-                type="password"
-                placeholder="Yeni şifre"
-                error={passwordForm.formState.errors.newPassword?.message}
-                {...passwordForm.register("newPassword")}
-              />
-              <ProfileField
-                label="Yeni Şifre Tekrar"
-                type="password"
-                placeholder="Yeni şifre tekrar"
-                error={passwordForm.formState.errors.confirmPassword?.message}
-                {...passwordForm.register("confirmPassword")}
-              />
-
-              <button
-                type="submit"
-                disabled={passwordForm.formState.isSubmitting}
-                className={`inline-flex h-12 w-full items-center justify-center rounded-2xl bg-primary px-5 text-sm font-bold text-primary-foreground disabled:opacity-70 ${interactiveClass}`}
-                style={{ boxShadow: "0 18px 32px -20px color-mix(in oklab, var(--primary) 70%, transparent)" }}
-              >
-                {passwordForm.formState.isSubmitting ? "Şifre güncelleniyor..." : "Şifreyi Güncelle"}
-              </button>
-            </form>
-          </div>
-
-          <div className={`rounded-[2rem] border border-border/60 bg-card/82 p-6 backdrop-blur-2xl ${interactiveClass}`} style={{ boxShadow: cardShadow }}>
-            <div className="mb-7 flex items-center gap-3">
-              {user.role === "ADMIN" ? <Crown className="h-5 w-5 text-primary" /> : <UserRound className="h-5 w-5 text-primary" />}
-              <div>
-                <h2 className="text-xl font-black text-foreground">Hesap Durumu</h2>
-                <p className="mt-1 text-sm text-foreground/62">Rol, erişim ve hızlı işlemler.</p>
-              </div>
-            </div>
-
-            <div className="space-y-3 text-sm">
-              <div className="flex items-center justify-between rounded-2xl bg-background/75 px-4 py-3">
-                <span className="text-foreground/62">Rol</span>
-                <span className="font-bold text-foreground">{user.role}</span>
-              </div>
-              <div className="flex items-center justify-between rounded-2xl bg-background/75 px-4 py-3">
-                <span className="text-foreground/62">Kullanıcı adı</span>
-                <span className="font-bold text-foreground">@{user.username}</span>
-              </div>
-              <div className="flex items-center justify-between rounded-2xl bg-background/75 px-4 py-3">
-                <span className="text-foreground/62">Güncellendi</span>
-                <span className="font-bold text-foreground">{new Date(user.updatedAt).toLocaleDateString("tr-TR")}</span>
-              </div>
+        <section className={`h-full rounded-[2rem] border border-border/60 bg-card/82 p-6 backdrop-blur-2xl ${interactiveClass}`} style={{ boxShadow: cardShadow }}>
+          <div className="mb-7 flex items-center gap-3">
+            <KeyRound className="h-5 w-5 text-primary" />
+            <div>
+              <h2 className="text-xl font-black text-foreground">Şifre Değiştir</h2>
+              <p className="mt-1 text-sm text-foreground/62">Mevcut şifreni doğrula ve yeni şifre belirle.</p>
             </div>
           </div>
 
-          <div className={`rounded-[2rem] border border-border/60 bg-card/82 p-6 backdrop-blur-2xl ${interactiveClass}`} style={{ boxShadow: cardShadow }}>
-            <div className="mb-7 flex items-center gap-3">
-              <Settings className="h-5 w-5 text-primary" />
-              <div>
-                <h2 className="text-xl font-black text-foreground">Hızlı Kısayollar</h2>
-                <p className="mt-1 text-sm text-foreground/62">Profil dışındaki temel kullanıcı aksiyonları.</p>
-              </div>
-            </div>
+          <form className="space-y-6" onSubmit={handlePasswordSubmit}>
+            <ProfileField
+              label="Mevcut Şifre"
+              type="password"
+              placeholder="Mevcut şifre"
+              error={passwordForm.formState.errors.currentPassword?.message}
+              {...passwordForm.register("currentPassword")}
+            />
+            <ProfileField
+              label="Yeni Şifre"
+              type="password"
+              placeholder="Yeni şifre"
+              error={passwordForm.formState.errors.newPassword?.message}
+              {...passwordForm.register("newPassword")}
+            />
+            <ProfileField
+              label="Yeni Şifre Tekrar"
+              type="password"
+              placeholder="Yeni şifre tekrar"
+              error={passwordForm.formState.errors.confirmPassword?.message}
+              {...passwordForm.register("confirmPassword")}
+            />
 
-            <div className="grid gap-3">
-              <Link
-                href="/settings"
-                className={`flex items-center justify-between rounded-2xl border border-border/60 bg-background/75 px-4 py-4 text-sm font-semibold text-foreground ${interactiveClass}`}
-              >
-                Tema ve uygulama ayarları
-                <ArrowUpRight className="h-4 w-4 text-primary" />
-              </Link>
-              <button
-                type="button"
-                onClick={logout}
-                disabled={isLoggingOut}
-                className={`flex items-center justify-between rounded-2xl border border-border/60 bg-background/75 px-4 py-4 text-left text-sm font-semibold text-foreground disabled:opacity-70 ${interactiveClass}`}
-              >
-                {isLoggingOut ? "Çıkış yapılıyor..." : "Oturumu kapat"}
-                <ArrowUpRight className="h-4 w-4 text-primary" />
-              </button>
+            <button
+              type="submit"
+              disabled={passwordForm.formState.isSubmitting}
+              className={`inline-flex h-12 w-full items-center justify-center rounded-2xl bg-primary px-5 text-sm font-bold text-primary-foreground disabled:opacity-70 ${interactiveClass}`}
+              style={{ boxShadow: "0 18px 32px -20px color-mix(in oklab, var(--primary) 70%, transparent)" }}
+            >
+              {passwordForm.formState.isSubmitting ? "Şifre güncelleniyor..." : "Şifreyi Güncelle"}
+            </button>
+          </form>
+        </section>
+
+        <section className={`h-full rounded-[2rem] border border-border/60 bg-card/82 p-6 backdrop-blur-2xl ${interactiveClass}`} style={{ boxShadow: cardShadow }}>
+          <div className="mb-7 flex items-center gap-3">
+            {user.role === "ADMIN" ? <Crown className="h-5 w-5 text-primary" /> : <UserRound className="h-5 w-5 text-primary" />}
+            <div>
+              <h2 className="text-xl font-black text-foreground">Hesap Durumu</h2>
+              <p className="mt-1 text-sm text-foreground/62">Rol, erişim ve hızlı işlemler.</p>
             </div>
+          </div>
+
+          <div className="space-y-3 text-sm">
+            <div className="flex items-center justify-between rounded-2xl bg-background/75 px-4 py-3">
+              <span className="text-foreground/62">Rol</span>
+              <span className="font-bold text-foreground">{user.role}</span>
+            </div>
+            <div className="flex items-center justify-between rounded-2xl bg-background/75 px-4 py-3">
+              <span className="text-foreground/62">Kullanıcı adı</span>
+              <span className="font-bold text-foreground">@{user.username}</span>
+            </div>
+            <div className="flex items-center justify-between rounded-2xl bg-background/75 px-4 py-3">
+              <span className="text-foreground/62">Güncellendi</span>
+              <span className="font-bold text-foreground">{new Date(user.updatedAt).toLocaleDateString("tr-TR")}</span>
+            </div>
+          </div>
+        </section>
+
+        <section className={`h-full rounded-[2rem] border border-border/60 bg-card/82 p-6 backdrop-blur-2xl ${interactiveClass}`} style={{ boxShadow: cardShadow }}>
+          <div className="mb-7 flex items-center gap-3">
+            <Settings className="h-5 w-5 text-primary" />
+            <div>
+              <h2 className="text-xl font-black text-foreground">Hızlı Kısayollar</h2>
+              <p className="mt-1 text-sm text-foreground/62">Profil dışındaki temel kullanıcı aksiyonları.</p>
+            </div>
+          </div>
+
+          <div className="grid gap-3">
+            <Link
+              href="/settings"
+              className={`flex items-center justify-between rounded-2xl border border-border/60 bg-background/75 px-4 py-4 text-sm font-semibold text-foreground ${interactiveClass}`}
+            >
+              Tema ve uygulama ayarları
+              <ArrowUpRight className="h-4 w-4 text-primary" />
+            </Link>
+            <button
+              type="button"
+              onClick={logout}
+              disabled={isLoggingOut}
+              className={`flex items-center justify-between rounded-2xl border border-rose-300/70 bg-rose-50 px-4 py-4 text-left text-sm font-semibold text-rose-700 transition-colors hover:border-rose-600 hover:bg-rose-600 hover:text-white disabled:opacity-70 ${interactiveClass}`}
+            >
+              {isLoggingOut ? "Çıkış yapılıyor..." : "Oturumu kapat"}
+              <LogOut className="h-4 w-4" />
+            </button>
           </div>
         </section>
       </div>

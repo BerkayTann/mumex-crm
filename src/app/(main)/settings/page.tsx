@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { Check, Info, LogOut, MoonStar, Palette, Settings, Sparkles, SunMedium, UserRound } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { SHADCN_THEME_OPTIONS, ThemeKey } from "@/core/constants/themeKeys";
 import { useTheme } from "@/core/providers/ThemeProvider";
-import { useAuth } from "@/features/auth/components/AuthProvider";
+import { useAuth } from "@/features/auth";
 
-const THEME_ICONS: Record<ThemeKey, React.ElementType> = {
+const THEME_ICONS: Record<ThemeKey, LucideIcon> = {
   light: SunMedium,
   dark: MoonStar,
 };
@@ -130,12 +131,12 @@ export default function AyarlarSayfasi() {
         <div className="rounded-[2rem] border border-border bg-card/95 shadow-sm">
           <div className="flex items-center gap-3 border-b border-border px-6 py-5">
             <Sparkles className="h-5 w-5 text-primary" />
-            <h2 className="text-base font-semibold text-foreground">Hesap Akışı</h2>
+            <h2 className="text-base font-semibold text-foreground">İletişim</h2>
           </div>
           <div className="space-y-3 px-6 py-5 text-sm text-muted-foreground">
-            <p>Kullanıcılar signup ile kendi hesabını oluşturabilir.</p>
-            <p>Login sırasında yalnızca kullanıcı adı ve parola yeterlidir.</p>
-            <p>Varsayılan admin hesabı ilk kullanımda otomatik oluşturulur.</p>
+            <p>E-posta: brkytn97@gmail.com</p>
+            <p></p>
+            <p></p>
           </div>
         </div>
 

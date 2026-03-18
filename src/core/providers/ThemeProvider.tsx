@@ -8,7 +8,7 @@ import {
   THEME_KEY,
   ThemeKey,
 } from "@/core/constants/themeKeys";
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 interface ThemeContextValue {
   theme: ThemeKey;
@@ -28,17 +28,29 @@ const applyThemeToDocument = (theme: ThemeKey) => {
 };
 
 const readStoredTheme = (): ThemeKey => {
-  if (typeof window === "undefined") return DEFAULT_THEME;
   const stored =
     (localStorage.getItem(THEME_KEY) ?? localStorage.getItem(LEGACY_THEME_KEY)) ?? DEFAULT_THEME;
   return isKnownTheme(stored) ? stored : DEFAULT_THEME;
 };
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const [theme, setTheme] = useState<ThemeKey>(() => readStoredTheme());
+  // SSR ile eşleşmesi için her zaman DEFAULT_THEME ile başla (localStorage okuma yok)
+  const [theme, setTheme] = useState<ThemeKey>(DEFAULT_THEME);
+  const isIlkMount = useRef(true);
 
+  // Client mount'ta depolanmış temayı oku ve uygula
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    const stored = readStoredTheme();
+    setTheme(stored);
+    applyThemeToDocument(stored);
+  }, []);
+
+  // Kullanıcı tema değiştirdiğinde kaydet (ilk mount'ta atla)
+  useEffect(() => {
+    if (isIlkMount.current) {
+      isIlkMount.current = false;
+      return;
+    }
     applyThemeToDocument(theme);
     localStorage.setItem(THEME_KEY, theme);
     localStorage.removeItem(LEGACY_THEME_KEY);
