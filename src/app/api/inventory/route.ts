@@ -90,7 +90,7 @@ export async function GET() {
       },
 
       // 5. Ürün adına göre sırala
-      { $sort: { urunAdi: 1 } },
+      { $sort: { urunAdi: 1 as const } },
     ];
 
     const kalemler = await ProductModel.aggregate<IEnvanterKalemi>(pipeline);
