@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useCallback } from "react";
-import { isSameDay } from "date-fns";
+import { isSameDay, format } from "date-fns";
 import { CalendarGrid } from "../components/CalendarGrid";
 import { CalendarHeader } from "../components/CalendarHeader";
 import { CalendarEventList } from "../components/CalendarEventList";
@@ -43,7 +43,7 @@ export const CalendarPageContainer = () => {
 
   // Tatil tarihlerini Set olarak tut (hızlı erişim)
   const tatilTarihleri = useMemo(() => {
-    return new Set(tatilVerisi.map((t) => t.tarih.toISOString().split("T")[0]));
+    return new Set(tatilVerisi.map((t) => format(t.tarih, "yyyy-MM-dd")));
   }, [tatilVerisi]);
 
   // Tüm etkinlikleri birleştir

@@ -1,6 +1,7 @@
 import { IVisit } from '../../../visit/types';
 import { IPlan, ICalendarEvent, CalendarEventSource, ETKINLIK_RENKLERI } from '../../types';
 import { ITatilGunu } from '@/core/constants/holidays';
+import { format } from 'date-fns';
 
 /**
  * Ziyaret kaydından takvim etkinliklerine dönüştürme.
@@ -90,7 +91,7 @@ export const plandanEtkinligeDonustur = (plan: IPlan): ICalendarEvent => {
  */
 export const tatildenEtkinligeDonustur = (tatil: ITatilGunu): ICalendarEvent => {
   return {
-    id: `HOLIDAY_${tatil.ad.replace(/\s/g, '_')}_${tatil.tarih.toISOString().split('T')[0]}`,
+    id: `HOLIDAY_${tatil.ad.replace(/\s/g, '_')}_${format(tatil.tarih, 'yyyy-MM-dd')}`,
     title: tatil.ad,
     date: tatil.tarih.toISOString(),
     source: CalendarEventSource.HOLIDAY,

@@ -10,6 +10,7 @@ import {
   isSameDay,
   isToday,
   isSameMonth,
+  format,
 } from "date-fns";
 import { ICalendarEvent } from "../types";
 import { CalendarDayCell } from "./CalendarDayCell";
@@ -46,7 +47,7 @@ export const CalendarGrid = ({
   // Etkinlikleri tarihe göre grupla (verimli erişim için)
   const tarihEtkinlikHaritasi = new Map<string, ICalendarEvent[]>();
   for (const etkinlik of etkinlikler) {
-    const tarihStr = etkinlik.date.split("T")[0];
+    const tarihStr = format(new Date(etkinlik.date), "yyyy-MM-dd");
     if (!tarihEtkinlikHaritasi.has(tarihStr)) {
       tarihEtkinlikHaritasi.set(tarihStr, []);
     }
@@ -70,7 +71,7 @@ export const CalendarGrid = ({
       {/* Takvim hücreleri */}
       <div className="grid grid-cols-7 gap-px bg-border/30 p-px">
         {gunler.map((gun) => {
-          const tarihStr = gun.toISOString().split("T")[0];
+          const tarihStr = format(gun, "yyyy-MM-dd");
           const gunEtkinlikleri = tarihEtkinlikHaritasi.get(tarihStr) || [];
 
           return (
