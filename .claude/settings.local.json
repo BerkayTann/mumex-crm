@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la /Users/tanhome/Desktop/mumex/mumex-crm/src/app/\\\\\\(main\\\\\\)/)",
+      "Bash(ls -la /Users/tanhome/Desktop/mumex/mumex-crm/src/app/\\\\\\(main\\\\\\)/dashboard/)",
+      "Bash(ls -la /Users/tanhome/Desktop/mumex/mumex-crm/src/app/\\\\\\(auth\\\\\\)/login/)",
+      "Bash(ls -la /Users/tanhome/Desktop/mumex/mumex-crm/src/app/\\\\\\(auth\\\\\\)/signup/)",
+      "Bash(ls -la \"/Users/tanhome/Desktop/mumex/mumex-crm/src/app/\\(auth\\)/\")",
+      "Bash(npm run:*)",
+      "Bash(npx next:*)"
+    ]
+  }
+}

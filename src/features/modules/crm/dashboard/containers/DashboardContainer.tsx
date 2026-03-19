@@ -319,10 +319,10 @@ export const DashboardContainer = () => {
                     {new Date(z.visitDate).toLocaleDateString("tr-TR")}
                   </td>
                   <td className="px-4 py-3 font-medium text-slate-800 sm:px-5">
-                    {typeof z.companyId === "object" ? z.companyId.name : "-"}
+                    {z.companyId && typeof z.companyId === "object" ? z.companyId.name : "-"}
                   </td>
                   <td className="px-4 py-3 text-slate-600 sm:px-5">
-                    {typeof z.userId === "object" ? `${z.userId.firstName} ${z.userId.lastName}` : "-"}
+                    {z.userId && typeof z.userId === "object" ? `${z.userId.firstName} ${z.userId.lastName}` : "-"}
                   </td>
                   <td className="px-4 py-3 text-right font-bold sm:px-5">
                     <MoneyText value={z.totalAmount} />
