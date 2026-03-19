@@ -18,11 +18,12 @@ export interface IPlan {
   relatedUserId?: string;
   isCompleted: boolean;
   color?: string;
+  createdBy?: string;
   createdAt: string;
   updatedAt: string;
 }
 
-export type ICreatePlanPayload = Omit<IPlan, '_id' | 'createdAt' | 'updatedAt'>;
+export type ICreatePlanPayload = Omit<IPlan, '_id' | 'createdAt' | 'updatedAt' | 'createdBy'>;
 
 // --- Takvim Etkinliği (Birleşik UI Entity) ---
 export enum CalendarEventSource {

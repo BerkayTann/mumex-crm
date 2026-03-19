@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { veritabaninaBaglan } from '@/lib/dbConnect';
 import { UserModel } from '@/features/modules/crm/users/schema/UserModel';
 import { VisitModel } from '@/features/modules/crm/visit/schema/VisitModel';
+import { apiKimlikDogrula } from '@/core/api/apiAuthGuard';
+import mongoose from 'mongoose';
 
 import '@/features/modules/crm/company/schema/CompanyModel';
 import '@/features/modules/crm/product/schema/ProductModel';
@@ -20,15 +22,19 @@ export async function GET(_istek: NextRequest, { params }: IRouteParams) {
   const { id } = await params;
 
   try {
+    const { kullanici, hata } = await apiKimlikDogrula();
+    if (hata) return hata;
+
     await veritabaninaBaglan();
 
-    const doktorBilgisi = await UserModel.findById(id).populate('companyId').lean();
+    const kullaniciId = new mongoose.Types.ObjectId(kullanici._id);
+    const doktorBilgisi = await UserModel.findOne({ _id: id, createdBy: kullaniciId }).populate('companyId').lean();
 
     if (!doktorBilgisi) {
       return NextResponse.json({ basarili: false, mesaj: 'Doktor bulunamadı.' }, { status: 404 });
     }
 
-    const satisGecmisi = await VisitModel.find({ userId: id })
+    const satisGecmisi = await VisitModel.find({ userId: id, createdBy: kullaniciId })
       .populate('products.productId')
       .sort({ visitDate: -1 })
       .lean();

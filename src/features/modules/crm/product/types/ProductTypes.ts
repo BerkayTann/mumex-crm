@@ -18,10 +18,11 @@ export interface IProduct {
     priceInTRY?: number;    // Kayıt anındaki TRY karşılığı (live kur ile hesaplanır)
     description: string;
     isActive: boolean;
+    createdBy?: string;
     createdAt: Date;
     updatedAt: Date;
 }
 
 
 // Yeni ürün oluştururken veritabanının otomatik atayacağı alanları dışarıda bırakıyoruz
-export type ICreateProductPayload = Omit<IProduct, '_id' | 'createdAt' | 'updatedAt'>;
+export type ICreateProductPayload = Omit<IProduct, '_id' | 'createdAt' | 'updatedAt' | 'createdBy'>;

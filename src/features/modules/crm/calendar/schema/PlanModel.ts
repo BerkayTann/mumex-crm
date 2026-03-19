@@ -2,7 +2,8 @@ import mongoose, { Schema, Document } from 'mongoose';
 import { IPlan, PlanType } from '../types';
 
 // IPlan'daki string tarih alanlarını Mongoose Date ile eziyoruz
-export interface IPlanDocument extends Omit<IPlan, '_id' | 'date' | 'endDate' | 'createdAt' | 'updatedAt'>, Document {
+export interface IPlanDocument extends Omit<IPlan, '_id' | 'date' | 'endDate' | 'createdAt' | 'updatedAt' | 'createdBy'>, Document {
+  createdBy: mongoose.Types.ObjectId;
   date: Date;
   endDate?: Date;
   createdAt: Date;
@@ -24,6 +25,7 @@ const planVeritabaniSemasi = new Schema<IPlanDocument>(
     relatedUserId: { type: Schema.Types.ObjectId, ref: 'User' },
     isCompleted: { type: Boolean, default: false },
     color: { type: String, default: '#6366f1' },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'AuthUser', required: true, index: true },
   },
   {
     timestamps: true,
@@ -31,8 +33,8 @@ const planVeritabaniSemasi = new Schema<IPlanDocument>(
 );
 
 // Tarih aralığı sorguları için index
-planVeritabaniSemasi.index({ date: 1 });
-planVeritabaniSemasi.index({ isCompleted: 1, date: 1 });
+planVeritabaniSemasi.index({ createdBy: 1, date: 1 });
+planVeritabaniSemasi.index({ createdBy: 1, isCompleted: 1, date: 1 });
 
 // Next.js Hot Reloading sırasında model güncellenmesini garanti altına almak için:
 if (mongoose.models.Plan) {

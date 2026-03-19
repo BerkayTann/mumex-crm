@@ -3,9 +3,10 @@ import { IVisit, VisitStatus } from '../types';
 
 // Veritabanı seviyesinde kullanılacak döküman arayüzü
 // IVisit'ten gelen string tiplerini, Mongoose'un beklediği tiplerle eziyoruz (Override)
-export interface IVisitDocument extends Omit<IVisit, '_id' | 'companyId' | 'userId' | 'visitDate' | 'products' | 'plannedDate' | 'cargoDate' | 'deliveryDate' | 'createdAt' | 'updatedAt'>, Document {
+export interface IVisitDocument extends Omit<IVisit, '_id' | 'companyId' | 'userId' | 'visitDate' | 'products' | 'plannedDate' | 'cargoDate' | 'deliveryDate' | 'createdAt' | 'updatedAt' | 'createdBy'>, Document {
   companyId: mongoose.Types.ObjectId;
   userId: mongoose.Types.ObjectId;
+  createdBy: mongoose.Types.ObjectId;
   visitDate: Date;
   plannedDate?: Date | null;
   cargoDate?: Date | null;
@@ -46,6 +47,7 @@ const ziyaretVeritabaniSemasi = new Schema<IVisitDocument>(
     deliveryDate: { type: Date },
     products: [visitProductDbSchema],
     totalAmount: { type: Number, required: true, default: 0 },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'AuthUser', required: true, index: true },
   },
   {
     timestamps: true,

@@ -6,6 +6,8 @@ import { araliktakiTatilleriGetir } from '@/core/constants/holidays';
 import { startOfDay, endOfDay, addDays, differenceInCalendarDays } from 'date-fns';
 import { NotificationType, BILDIRIM_RENKLERI } from '@/features/modules/crm/notification/types';
 import { INotification } from '@/features/modules/crm/notification/types';
+import { apiKimlikDogrula } from '@/core/api/apiAuthGuard';
+import mongoose from 'mongoose';
 
 // Populate için modellerin bellekte olması ZORUNLUDUR
 import '@/features/modules/crm/company/schema/CompanyModel';
@@ -37,8 +39,12 @@ const gunAciklamasi = (gunSayisi: number): string => {
 // Yaklaşan 3 gün içindeki tüm etkinlikleri hesaplar
 export async function GET() {
   try {
+    const { kullanici, hata } = await apiKimlikDogrula();
+    if (hata) return hata;
+
     await veritabaninaBaglan();
 
+    const kullaniciId = new mongoose.Types.ObjectId(kullanici._id);
     const bugun = startOfDay(new Date());
     const ucGunSonra = endOfDay(addDays(bugun, 3));
     const tarihAraligi = { $gte: bugun, $lte: ucGunSonra };
@@ -49,6 +55,7 @@ export async function GET() {
     const planlananZiyaretler = await VisitModel.find({
       plannedDate: tarihAraligi,
       status: 'PLANNED',
+      createdBy: kullaniciId,
     }).populate('companyId userId');
 
     for (const z of planlananZiyaretler) {
@@ -74,6 +81,7 @@ export async function GET() {
     const kargodakiZiyaretler = await VisitModel.find({
       cargoDate: tarihAraligi,
       cargoStatus: 'Kargoda',
+      createdBy: kullaniciId,
     }).populate('companyId userId');
 
     for (const z of kargodakiZiyaretler) {
@@ -97,6 +105,7 @@ export async function GET() {
     // 3. Teslimat tarihi yaklaşanlar
     const teslimatZiyaretleri = await VisitModel.find({
       deliveryDate: tarihAraligi,
+      createdBy: kullaniciId,
     }).populate('companyId userId');
 
     for (const z of teslimatZiyaretleri) {
@@ -121,6 +130,7 @@ export async function GET() {
     const yaklasanPlanlar = await PlanModel.find({
       date: tarihAraligi as unknown as Date,
       isCompleted: false,
+      createdBy: kullaniciId,
     });
 
     for (const p of yaklasanPlanlar) {

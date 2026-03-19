@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { veritabaninaBaglan } from '@/lib/dbConnect';
 import { ziyaretEklemeSemasi } from '@/features/modules/crm/visit/schema';
 import { VisitModel } from '@/features/modules/crm/visit/schema/VisitModel';
+import { apiKimlikDogrula } from '@/core/api/apiAuthGuard';
+import mongoose from 'mongoose';
 
 // Populate işlemi için diğer modellerin bellekte derlenmiş olması ZORUNLUDUR
 import '@/features/modules/crm/company/schema/CompanyModel';
@@ -11,14 +13,17 @@ import '@/features/modules/crm/product/schema/ProductModel';
 // 1. ZİYARETLERİ VE SATIŞLARI LİSTELEME (GET)
 export async function GET() {
   try {
+    const { kullanici, hata } = await apiKimlikDogrula();
+    if (hata) return hata;
+
     await veritabaninaBaglan();
 
-    // Mimarın Şovu: Tek bir sorguda 4 farklı tablodan veri birleştiriyoruz!
-    const ziyaretler = await VisitModel.find()
-      .populate('companyId') // Kurum bilgilerini getir
-      .populate('userId')    // Doktor bilgilerini getir
-      .populate('products.productId') // Satılan ürünlerin detaylarını getir (İç içe populate)
-      .sort({ visitDate: -1, createdAt: -1 }); // En yeni ziyaret en üstte
+    const kullaniciId = new mongoose.Types.ObjectId(kullanici._id);
+    const ziyaretler = await VisitModel.find({ createdBy: kullaniciId })
+      .populate('companyId')
+      .populate('userId')
+      .populate('products.productId')
+      .sort({ visitDate: -1, createdAt: -1 });
 
     return NextResponse.json({ basarili: true, veri: ziyaretler }, { status: 200 });
   } catch (hata) {
@@ -33,11 +38,12 @@ export async function GET() {
 // 2. YENİ ZİYARET / SATIŞ EKLEME (POST)
 export async function POST(istek: NextRequest) {
   try {
+    const { kullanici, hata } = await apiKimlikDogrula();
+    if (hata) return hata;
+
     await veritabaninaBaglan();
 
     const istekGovdesi = await istek.json();
-
-    // Zod şemamız veriyi denetliyor (Ürünlerin adetleri, fiyatları vb. kurallara uygun mu?)
     const dogrulamaSonucu = ziyaretEklemeSemasi.safeParse(istekGovdesi);
 
     if (!dogrulamaSonucu.success) {
@@ -47,7 +53,11 @@ export async function POST(istek: NextRequest) {
       );
     }
 
-    const yeniZiyaret = await VisitModel.create(dogrulamaSonucu.data);
+    const kullaniciId = new mongoose.Types.ObjectId(kullanici._id);
+    const yeniZiyaret = await VisitModel.create({
+      ...dogrulamaSonucu.data,
+      createdBy: kullaniciId,
+    });
 
     return NextResponse.json(
       { basarili: true, mesaj: 'Ziyaret başarıyla kaydedildi.', veri: yeniZiyaret },

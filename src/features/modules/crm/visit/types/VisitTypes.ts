@@ -33,8 +33,9 @@ export interface IVisit {
   deliveryDate?: string | null; // Kargo durumu "Ulaştı" olduğunda, teslim tarihi
   products: IVisitProduct[]; // Satılan ürünler listesi
   totalAmount: number; // Ziyaretin KDV dahil Genel Toplam Cirosu
+  createdBy?: string;
   createdAt: string;
   updatedAt: string;
 }
 
-export type ICreateVisitPayload = Omit<IVisit, '_id' | 'createdAt' | 'updatedAt'>;
+export type ICreateVisitPayload = Omit<IVisit, '_id' | 'createdAt' | 'updatedAt' | 'createdBy'>;

@@ -3,6 +3,8 @@ import { veritabaninaBaglan } from '@/lib/dbConnect';
 import { planEklemeSemasi } from '@/features/modules/crm/calendar/schema';
 import { PlanModel } from '@/features/modules/crm/calendar/schema/PlanModel';
 import { startOfMonth, endOfMonth } from 'date-fns';
+import { apiKimlikDogrula } from '@/core/api/apiAuthGuard';
+import mongoose from 'mongoose';
 
 // Populate için diğer modellerin bellekte derlenmiş olması ZORUNLUDUR
 import '@/features/modules/crm/company/schema/CompanyModel';
@@ -12,18 +14,22 @@ import '@/features/modules/crm/users/schema/UserModel';
 // Query: ?month=2026-03 (YYYY-MM formatında)
 export async function GET(istek: NextRequest) {
   try {
+    const { kullanici, hata } = await apiKimlikDogrula();
+    if (hata) return hata;
+
     await veritabaninaBaglan();
 
+    const kullaniciId = new mongoose.Types.ObjectId(kullanici._id);
     const ayParametresi = istek.nextUrl.searchParams.get('month');
 
-    let filtre = {};
+    const filtre: Record<string, unknown> = { createdBy: kullaniciId };
     if (ayParametresi) {
       const [yilStr, ayStr] = ayParametresi.split('-');
       const yil = parseInt(yilStr, 10);
       const ay = parseInt(ayStr, 10) - 1; // 0-indexed
       const ayBaslangici = startOfMonth(new Date(yil, ay));
       const ayBitisi = endOfMonth(new Date(yil, ay));
-      filtre = { date: { $gte: ayBaslangici, $lte: ayBitisi } };
+      filtre.date = { $gte: ayBaslangici, $lte: ayBitisi };
     }
 
     const planlar = await PlanModel.find(filtre)
@@ -44,8 +50,12 @@ export async function GET(istek: NextRequest) {
 // 2. YENİ PLAN EKLEME (POST)
 export async function POST(istek: NextRequest) {
   try {
+    const { kullanici, hata } = await apiKimlikDogrula();
+    if (hata) return hata;
+
     await veritabaninaBaglan();
 
+    const kullaniciId = new mongoose.Types.ObjectId(kullanici._id);
     const istekGovdesi = await istek.json();
     const dogrulamaSonucu = planEklemeSemasi.safeParse(istekGovdesi);
 
@@ -63,6 +73,7 @@ export async function POST(istek: NextRequest) {
       endDate: dogrulamaSonucu.data.endDate || undefined,
       relatedCompanyId: dogrulamaSonucu.data.relatedCompanyId || undefined,
       relatedUserId: dogrulamaSonucu.data.relatedUserId || undefined,
+      createdBy: kullaniciId,
     };
 
     const yeniPlan = await PlanModel.create(temizVeri);

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { veritabaninaBaglan } from '@/lib/dbConnect';
 import { planEklemeSemasi } from '@/features/modules/crm/calendar/schema';
 import { PlanModel } from '@/features/modules/crm/calendar/schema/PlanModel';
+import { apiKimlikDogrula } from '@/core/api/apiAuthGuard';
+import mongoose from 'mongoose';
 
 // 1. PLAN GÜNCELLEME (PUT)
 export async function PUT(
@@ -9,6 +11,9 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { kullanici, hata } = await apiKimlikDogrula();
+    if (hata) return hata;
+
     await veritabaninaBaglan();
     const { id } = await params;
 
@@ -30,7 +35,12 @@ export async function PUT(
       relatedUserId: dogrulamaSonucu.data.relatedUserId || undefined,
     };
 
-    const guncellenenPlan = await PlanModel.findByIdAndUpdate(id, temizVeri, { new: true });
+    const kullaniciId = new mongoose.Types.ObjectId(kullanici._id);
+    const guncellenenPlan = await PlanModel.findOneAndUpdate(
+      { _id: id, createdBy: kullaniciId },
+      temizVeri,
+      { new: true }
+    );
 
     if (!guncellenenPlan) {
       return NextResponse.json(
@@ -58,10 +68,14 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { kullanici, hata } = await apiKimlikDogrula();
+    if (hata) return hata;
+
     await veritabaninaBaglan();
     const { id } = await params;
 
-    const silinenPlan = await PlanModel.findByIdAndDelete(id);
+    const kullaniciId = new mongoose.Types.ObjectId(kullanici._id);
+    const silinenPlan = await PlanModel.findOneAndDelete({ _id: id, createdBy: kullaniciId });
 
     if (!silinenPlan) {
       return NextResponse.json(

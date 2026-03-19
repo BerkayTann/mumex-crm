@@ -22,9 +22,10 @@ export interface IUser {
   companyId: string; // Populate edildiğinde ICompany objesi olur
   isActive: boolean;
   segment?: KisiSegmenti; // Aggregation ile hesaplanan A/B/C sınıfı
+  createdBy?: string;
   createdAt: Date;
   updatedAt: Date;
 }
 
 // Yeni kayıt oluştururken _id ve tarihleri yollamayacağımız tip
-export type ICreateUserPayload = Omit<IUser, '_id' | 'createdAt' | 'updatedAt'>;
+export type ICreateUserPayload = Omit<IUser, '_id' | 'createdAt' | 'updatedAt' | 'createdBy'>;

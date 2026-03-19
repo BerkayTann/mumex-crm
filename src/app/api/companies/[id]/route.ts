@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { veritabaninaBaglan } from '@/lib/dbConnect';
 import { CompanyModel } from '@/features/modules/crm/company/schema/CompanyModel';
 import { sirketEklemeSemasi } from '@/features/modules/crm/company/schema';
+import { apiKimlikDogrula } from '@/core/api/apiAuthGuard';
+import mongoose from 'mongoose';
 
-// URL'den gelen parametrenin tipini belirliyoruz
 interface IRouteParams {
   params: Promise<{
     id: string;
@@ -13,22 +14,24 @@ interface IRouteParams {
 // 1. KURUM GÜNCELLEME (PUT İsteği)
 export async function PUT(istek: NextRequest, { params }: IRouteParams) {
   try {
+    const { kullanici, hata } = await apiKimlikDogrula();
+    if (hata) return hata;
+
     const { id } = await params;
     await veritabaninaBaglan();
     const istekGovdesi = await istek.json();
 
-    // Zod ile gelen güncel veriyi doğruluyoruz
     const dogrulamaSonucu = sirketEklemeSemasi.safeParse(istekGovdesi);
 
     if (!dogrulamaSonucu.success) {
         return NextResponse.json({ basarili: false, mesaj: 'Geçersiz veri.' }, { status: 400 });
     }
 
-    // Veritabanında o ID'ye sahip kurumu bul ve yeni veriyle değiştir (Güncelle)
-    const guncellenenSirket = await CompanyModel.findByIdAndUpdate(
-      id, 
-      dogrulamaSonucu.data, 
-      { new: true } // new: true -> Güncellenmiş yeni veriyi geri döndürür
+    const kullaniciId = new mongoose.Types.ObjectId(kullanici._id);
+    const guncellenenSirket = await CompanyModel.findOneAndUpdate(
+      { _id: id, createdBy: kullaniciId },
+      dogrulamaSonucu.data,
+      { new: true }
     );
 
     if (!guncellenenSirket) {
@@ -45,9 +48,14 @@ export async function PUT(istek: NextRequest, { params }: IRouteParams) {
 // 2. KURUM SİLME (DELETE İsteği)
 export async function DELETE(istek: NextRequest, { params }: IRouteParams) {
   try {
+    const { kullanici, hata } = await apiKimlikDogrula();
+    if (hata) return hata;
+
     const { id } = await params;
     await veritabaninaBaglan();
-    const silinenSirket = await CompanyModel.findByIdAndDelete(id);
+
+    const kullaniciId = new mongoose.Types.ObjectId(kullanici._id);
+    const silinenSirket = await CompanyModel.findOneAndDelete({ _id: id, createdBy: kullaniciId });
 
     if (!silinenSirket) {
       return NextResponse.json({ basarili: false, mesaj: 'Kurum bulunamadı.' }, { status: 404 });

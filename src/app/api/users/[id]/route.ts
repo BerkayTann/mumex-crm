@@ -4,6 +4,7 @@ import { UserModel } from '@/features/modules/crm/users/schema/UserModel';
 import { CompanyModel } from '@/features/modules/crm/company/schema/CompanyModel';
 import { kisiEklemeSemasi } from '@/features/modules/crm/users/schema';
 import { ildenBolgeGetir } from '@/core/constants/cities';
+import { apiKimlikDogrula } from '@/core/api/apiAuthGuard';
 import mongoose from 'mongoose';
 
 interface IRouteParams {
@@ -13,6 +14,9 @@ interface IRouteParams {
 // 1. KİŞİ GÜNCELLEME (PUT) - find-or-create company mantığı
 export async function PUT(istek: NextRequest, { params }: IRouteParams) {
   try {
+    const { kullanici, hata } = await apiKimlikDogrula();
+    if (hata) return hata;
+
     const { id } = await params;
     await veritabaninaBaglan();
     const istekGovdesi = await istek.json();
@@ -22,13 +26,14 @@ export async function PUT(istek: NextRequest, { params }: IRouteParams) {
       return NextResponse.json({ basarili: false, mesaj: 'Geçersiz veri.' }, { status: 400 });
     }
 
+    const kullaniciId = new mongoose.Types.ObjectId(kullanici._id);
     const { sirketAdi, sirketTipi, sehir, ilce, forceNewCompany = false, ...kisiVerisi } =
       dogrulamaSonucu.data;
 
     const bolge = ildenBolgeGetir(sehir);
     const temizIsim = sirketAdi.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const nameRegex = new RegExp(`^${temizIsim}$`, 'i');
-    const benzerKurumlar = await CompanyModel.find({ name: { $regex: nameRegex } });
+    const benzerKurumlar = await CompanyModel.find({ name: { $regex: nameRegex }, createdBy: kullaniciId });
 
     const ayniSehirdeKurum = benzerKurumlar.find(
       (k) => k.city?.toLowerCase().trim() === sehir.toLowerCase().trim(),
@@ -62,11 +67,12 @@ export async function PUT(istek: NextRequest, { params }: IRouteParams) {
         district: ilce || undefined,
         region: bolge || undefined,
         isActive: true,
+        createdBy: kullaniciId,
       });
     }
 
-    const guncellenenKisi = await UserModel.findByIdAndUpdate(
-      id,
+    const guncellenenKisi = await UserModel.findOneAndUpdate(
+      { _id: id, createdBy: kullaniciId },
       { ...kisiVerisi, companyId: new mongoose.Types.ObjectId(String(kurum._id)) },
       { new: true },
     );
@@ -82,9 +88,14 @@ export async function PUT(istek: NextRequest, { params }: IRouteParams) {
 // 2. KİŞİ SİLME (DELETE)
 export async function DELETE(istek: NextRequest, { params }: IRouteParams) {
   try {
+    const { kullanici, hata } = await apiKimlikDogrula();
+    if (hata) return hata;
+
     const { id } = await params;
     await veritabaninaBaglan();
-    const silinenKisi = await UserModel.findByIdAndDelete(id);
+
+    const kullaniciId = new mongoose.Types.ObjectId(kullanici._id);
+    const silinenKisi = await UserModel.findOneAndDelete({ _id: id, createdBy: kullaniciId });
     if (!silinenKisi)
       return NextResponse.json({ basarili: false, mesaj: 'Kişi bulunamadı.' }, { status: 404 });
 

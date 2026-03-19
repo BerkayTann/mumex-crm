@@ -4,14 +4,22 @@ import { kisiEklemeSemasi } from '@/features/modules/crm/users/schema';
 import { UserModel } from '@/features/modules/crm/users/schema/UserModel';
 import { CompanyModel } from '@/features/modules/crm/company/schema/CompanyModel';
 import { ildenBolgeGetir } from '@/core/constants/cities';
+import { apiKimlikDogrula } from '@/core/api/apiAuthGuard';
 import mongoose from 'mongoose';
 
 // 1. KİŞİLERİ LİSTELEME (GET) - Aggregation ile segment (A/B/C) dahil
 export async function GET() {
   try {
+    const { kullanici, hata } = await apiKimlikDogrula();
+    if (hata) return hata;
+
     await veritabaninaBaglan();
 
+    const kullaniciId = new mongoose.Types.ObjectId(kullanici._id);
+
     const kisiler = await UserModel.aggregate([
+      // Sadece bu kullanıcıya ait kişileri getir
+      { $match: { createdBy: kullaniciId } },
       {
         $lookup: {
           from: 'visits',
@@ -80,8 +88,12 @@ export async function GET() {
 // 2. YENİ KİŞİ EKLEME (POST) - find-or-create company mantığı
 export async function POST(istek: NextRequest) {
   try {
+    const { kullanici, hata } = await apiKimlikDogrula();
+    if (hata) return hata;
+
     await veritabaninaBaglan();
 
+    const kullaniciId = new mongoose.Types.ObjectId(kullanici._id);
     const istekGovdesi = await istek.json();
 
     const dogrulamaSonucu = kisiEklemeSemasi.safeParse(istekGovdesi);
@@ -100,11 +112,11 @@ export async function POST(istek: NextRequest) {
     const { sirketAdi, sirketTipi, sehir, ilce, sirketAdresi, forceNewCompany = false, ...kisiVerisi } =
       dogrulamaSonucu.data;
 
-    // Aynı isimli kurum varsa bağla, yoksa oluştur
+    // Aynı isimli kurum varsa bağla, yoksa oluştur — sadece bu kullanıcının kurumlarında ara
     const bolge = ildenBolgeGetir(sehir);
     const temizIsim = sirketAdi.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const nameRegex = new RegExp(`^${temizIsim}$`, 'i');
-    const benzerKurumlar = await CompanyModel.find({ name: { $regex: nameRegex } });
+    const benzerKurumlar = await CompanyModel.find({ name: { $regex: nameRegex }, createdBy: kullaniciId });
 
     let kurum = null;
     let hataNedeni: 'DUPLICATE_COMPANY_DIFFERENT_CITY' | 'DUPLICATE_COMPANY_DIFFERENT_ADDRESS' | null = null;
@@ -161,12 +173,14 @@ export async function POST(istek: NextRequest) {
         region: bolge || undefined,
         address: sirketAdresi || undefined,
         isActive: true,
+        createdBy: kullaniciId,
       });
     }
 
     const yeniKisi = await UserModel.create({
       ...kisiVerisi,
       companyId: new mongoose.Types.ObjectId(String(kurum._id)),
+      createdBy: kullaniciId,
     });
 
     return NextResponse.json(

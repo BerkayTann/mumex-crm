@@ -4,17 +4,24 @@ import { ProductModel } from '@/features/modules/crm/product/schema/ProductModel
 import { VisitModel } from '@/features/modules/crm/visit/schema/VisitModel';
 import { IEnvanterKalemi, IEnvanterOzet } from '@/features/modules/crm/inventory/types';
 import { VisitStatus } from '@/features/modules/crm/visit/types';
+import { apiKimlikDogrula } from '@/core/api/apiAuthGuard';
+import mongoose from 'mongoose';
 
 export async function GET() {
   try {
+    const { kullanici, hata } = await apiKimlikDogrula();
+    if (hata) return hata;
+
     await veritabaninaBaglan();
+
+    const kullaniciId = new mongoose.Types.ObjectId(kullanici._id);
 
     // VisitModel'i kayıtlı olduğundan emin olmak için referans et
     void VisitModel;
 
     const pipeline = [
-      // 1. Sadece aktif ürünleri al
-      { $match: { isActive: true } },
+      // 1. Sadece bu kullanıcının aktif ürünlerini al
+      { $match: { isActive: true, createdBy: kullaniciId } },
 
       // 2. COMPLETED ziyaretlerden bu ürüne ait satış toplamını çek
       {
@@ -27,6 +34,7 @@ export async function GET() {
                 $expr: {
                   $and: [
                     { $eq: ['$status', VisitStatus.COMPLETED] },
+                    { $eq: ['$createdBy', kullaniciId] },
                     { $in: ['$$pid', '$products.productId'] },
                   ],
                 },

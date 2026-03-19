@@ -1,7 +1,9 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import { IProduct, ProductCategory } from '../types';
 
-export interface IProductDocument extends Omit<IProduct, '_id'>, Document {}
+export interface IProductDocument extends Omit<IProduct, '_id' | 'createdBy'>, Document {
+  createdBy: mongoose.Types.ObjectId;
+}
 
 const urunVeritabaniSemasi = new Schema<IProductDocument>(
   {
@@ -18,6 +20,7 @@ const urunVeritabaniSemasi = new Schema<IProductDocument>(
     priceInTRY: { type: Number },
     description: { type: String },
     isActive: { type: Boolean, default: true },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'AuthUser', required: true, index: true },
   },
   {
     timestamps: true,

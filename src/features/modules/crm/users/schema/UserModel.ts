@@ -6,8 +6,9 @@ import { IUser, UserTitle } from '../types';
  * companyId frontend tarafında string olarak kullanılırken, 
  * veritabanı seviyesinde Types.ObjectId olarak saklanır.
  */
-export interface IUserDocument extends Omit<IUser, '_id' | 'companyId'>, Document {
+export interface IUserDocument extends Omit<IUser, '_id' | 'companyId' | 'createdBy'>, Document {
   companyId: Types.ObjectId;
+  createdBy: Types.ObjectId;
 }
 
 // MongoDB veritabanı şeması
@@ -23,11 +24,16 @@ const kisiVeritabaniSemasi = new Schema<IUserDocument>(
     // companyId artık IUserDocument içindeki Types.ObjectId ile tam uyumludur
     companyId: { type: Schema.Types.ObjectId, ref: 'Company', required: true },
     isActive: { type: Boolean, default: true },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'AuthUser', required: true, index: true },
   },
   {
     timestamps: true, // createdAt ve updatedAt alanlarını otomatik yönetir
   }
 );
 
-// Model daha önce tanımlanmışsa onu kullan (Next.js Hot Reload desteği için kritik)
-export const UserModel = mongoose.models.User || mongoose.model<IUserDocument>('User', kisiVeritabaniSemasi);
+// Next.js Hot Reloading sırasında model şemasının güncellenmesini garanti altına almak için:
+if (mongoose.models.User) {
+  delete mongoose.models.User;
+}
+
+export const UserModel = mongoose.model<IUserDocument>('User', kisiVeritabaniSemasi);
